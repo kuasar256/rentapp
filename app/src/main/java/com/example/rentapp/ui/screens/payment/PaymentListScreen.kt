@@ -17,9 +17,11 @@ import androidx.compose.material3.TabRowDefaults.tabIndicatorOffset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.*
+import androidx.navigation.NavHostController
 import com.example.rentapp.data.local.entity.Payment
 import com.example.rentapp.ui.screens.property.EmptyState
 import com.example.rentapp.ui.theme.*
+import com.example.rentapp.ui.components.RentAppBottomBar
 import com.example.rentapp.viewmodel.PaymentViewModel
 import java.text.NumberFormat
 import java.text.SimpleDateFormat
@@ -29,7 +31,9 @@ import java.util.Locale
 @Composable
 fun PaymentListScreen(
     viewModel: PaymentViewModel,
+    navController: NavHostController,
     onPaymentClick: (Long) -> Unit,
+    onAddClick: () -> Unit,
     onBack: () -> Unit
 ) {
     var selectedTab by remember { mutableIntStateOf(0) }
@@ -51,6 +55,11 @@ fun PaymentListScreen(
                     }
                 },
                 actions = {
+                    if (selectedTab == 2 && paidPayments.isNotEmpty()) {
+                        IconButton(onClick = { viewModel.clearPaidHistory() }) {
+                            Icon(Icons.Default.DeleteSweep, contentDescription = "Limpiar Historial", tint = Error)
+                        }
+                    }
                     if (delayedCount > 0) {
                         BadgedBox(badge = { Badge(containerColor = Error) { Text("$delayedCount") } }) {
                             Icon(Icons.Default.Warning, contentDescription = null, tint = Error)
@@ -60,6 +69,9 @@ fun PaymentListScreen(
                 },
                 colors = TopAppBarDefaults.topAppBarColors(containerColor = Background)
             )
+        },
+        bottomBar = {
+            RentAppBottomBar(navController = navController)
         },
         containerColor = Background
     ) { paddingValues ->
@@ -109,8 +121,21 @@ fun PaymentListScreen(
 
 @Composable
 fun PaymentCard(payment: Payment, onClick: () -> Unit) {
-    val currency = NumberFormat.getCurrencyInstance(Locale("es", "MX"))
-    val dateFormat = SimpleDateFormat("dd MMM yyyy", Locale("es", "MX"))
+    val context = androidx.compose.ui.platform.LocalContext.current
+    val currentCurrency by com.example.rentapp.data.preferences.PreferencesManager.getCurrencyFlow(context).collectAsState(initial = "USD")
+    val currencyFormatter = remember(currentCurrency) { 
+        val locale = when (currentCurrency) {
+            "BOB" -> java.util.Locale("es", "BO")
+            "MXN" -> java.util.Locale("es", "MX")
+            else -> java.util.Locale.US
+        }
+        java.text.NumberFormat.getCurrencyInstance(locale).apply {
+            try {
+                this.currency = java.util.Currency.getInstance(currentCurrency)
+            } catch (e: Exception) {}
+        }
+    }
+    val dateFormat = SimpleDateFormat("dd MMM yyyy", Locale.getDefault())
     val statusColor = when (payment.status) {
         "PAID" -> Primary; "DELAYED" -> Error; else -> Secondary
     }
@@ -144,7 +169,7 @@ fun PaymentCard(payment: Payment, onClick: () -> Unit) {
                 }
             }
             Column(horizontalAlignment = Alignment.End) {
-                Text(currency.format(payment.amount), color = statusColor, fontWeight = FontWeight.Bold, style = MaterialTheme.typography.titleMedium)
+                Text(currencyFormatter.format(payment.amount), color = statusColor, fontWeight = FontWeight.Bold, style = MaterialTheme.typography.titleMedium)
                 Surface(color = statusColor.copy(0.15f), shape = RoundedCornerShape(20.dp)) {
                     Text(statusLabel, modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp),
                         color = statusColor, fontSize = 10.sp, fontWeight = FontWeight.Medium)

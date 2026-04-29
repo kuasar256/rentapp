@@ -4,6 +4,11 @@ import androidx.room.*
 import com.example.rentapp.data.local.entity.Payment
 import kotlinx.coroutines.flow.Flow
 
+data class MonthlyEarning(
+    val month: Int,
+    val total: Double
+)
+
 @Dao
 interface PaymentDao {
     @Query("SELECT * FROM payments ORDER BY dueDate DESC")
@@ -30,6 +35,18 @@ interface PaymentDao {
     @Query("SELECT IFNULL(SUM(amount), 0.0) FROM payments WHERE status = 'PAID' AND year = :year")
     fun getTotalCollectedByYear(year: Int): Flow<Double>
 
+    @Query("SELECT month, IFNULL(SUM(amount), 0.0) as total FROM payments WHERE status = 'PAID' AND year = :year GROUP BY month ORDER BY month ASC")
+    fun getMonthlyEarningsByYear(year: Int): Flow<List<MonthlyEarning>>
+
+    @Query("SELECT COUNT(*) FROM payments WHERE status = 'PAID' AND year = :year")
+    fun getPaidCountByYear(year: Int): Flow<Int>
+
+    @Query("SELECT COUNT(*) FROM payments WHERE status = 'PENDING' AND year = :year")
+    fun getPendingCountByYear(year: Int): Flow<Int>
+
+    @Query("SELECT COUNT(*) FROM payments WHERE status = 'DELAYED' AND year = :year")
+    fun getDelayedCountByYear(year: Int): Flow<Int>
+
     @Query("SELECT COUNT(*) FROM payments WHERE status = 'DELAYED'")
     fun getDelayedCount(): Flow<Int>
 
@@ -39,8 +56,14 @@ interface PaymentDao {
     @Query("SELECT * FROM payments WHERE status = 'DELAYED' ORDER BY dueDate ASC")
     fun getDelayedPayments(): Flow<List<Payment>>
 
+    @Query("SELECT * FROM payments WHERE status = 'DELAYED'")
+    suspend fun getDelayedPaymentsSync(): List<Payment>
+
     @Query("SELECT * FROM payments WHERE status = 'PENDING'")
     suspend fun getPendingPaymentsSync(): List<Payment>
+
+    @Query("UPDATE payments SET status = 'DELAYED' WHERE status = 'PENDING' AND dueDate < :currentTime")
+    suspend fun markOverduePayments(currentTime: Long): Int
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertPayment(payment: Payment): Long
@@ -50,4 +73,10 @@ interface PaymentDao {
 
     @Delete
     suspend fun deletePayment(payment: Payment)
+
+    @Query("SELECT * FROM payments WHERE remoteId IS NULL")
+    suspend fun getUnsyncedPayments(): List<Payment>
+
+    @Query("SELECT * FROM payments WHERE remoteId = :remoteId LIMIT 1")
+    suspend fun getPaymentByRemoteId(remoteId: String): Payment?
 }

@@ -15,15 +15,17 @@ import androidx.room.PrimaryKey
 data class Payment(
     @PrimaryKey(autoGenerate = true)
     val id: Long = 0,
-    val contractId: Long,
-    val amount: Double,
-    val dueDate: Long,
+    val contractId: Long = 0,
+    val amount: Double = 0.0,
+    val dueDate: Long = 0,
     val paidDate: Long? = null,
     val status: String = "PENDING", // "PENDING", "DELAYED", "PAID"
-    val month: Int, // 1-12
-    val year: Int,
+    val month: Int = 0, // 1-12
+    val year: Int = 0,
     val paymentMethod: String = "", // "Efectivo", "Transferencia", "Cheque"
     val receiptNumber: String = "",
     val notes: String = "",
-    val createdAt: Long = System.currentTimeMillis()
+    val createdAt: Long = System.currentTimeMillis(),
+    val updatedAt: Long = System.currentTimeMillis(),
+    val remoteId: String? = null
 )

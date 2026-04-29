@@ -1,0 +1,18 @@
+[debug] [2026-04-29T13:35:26.090Z] [Firebase Plugin] Activating Firebase extension.
+[debug] [2026-04-29T13:35:42.220Z] [Firebase Plugin] requireAuthWrapper
+[debug] [2026-04-29T13:35:42.224Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2026-04-29T13:35:42.224Z] > authorizing via signed-in user (manuelibaneznoe@gmail.com)
+[debug] [2026-04-29T13:35:42.229Z] Checked if tokens are valid: true, expires at: 1777471294456
+[debug] [2026-04-29T13:35:42.230Z] Checked if tokens are valid: true, expires at: 1777471294456
+[debug] [2026-04-29T13:35:42.230Z] [Firebase Plugin] User found:  manuelibaneznoe@gmail.com
+[info] [Firebase Plugin] (Core:Project) New user detected, fetching projects
+[debug] [2026-04-29T13:35:42.232Z] Checked if tokens are valid: true, expires at: 1777471294456
+[debug] [2026-04-29T13:35:42.234Z] >>> [apiv2][query] GET https://firebase.googleapis.com/v1beta1/projects pageSize=1000
+[debug] [2026-04-29T13:35:42.248Z] [Firebase Plugin] VSCode notification server listening on port 40001
+[info] [Firebase Plugin] Starting SQL Connect toolkit (version 3.4.5) on port 50001
+[info] i  dataconnect: downloading dataconnect-emulator-3.4.5.exe... {"metadata":{"emulator":{"name":"dataconnect"},"message":"downloading dataconnect-emulator-3.4.5.exe..."}}
+[debug] [2026-04-29T13:35:58.463Z] >>> [apiv2][query] GET https://storage.googleapis.com/firemat-preview-drop/emulator/dataconnect-emulator-windows-amd64-v3.4.5 
+[debug] [2026-04-29T13:36:00.934Z] <<< [apiv2][status] GET https://storage.googleapis.com/firemat-preview-drop/emulator/dataconnect-emulator-windows-amd64-v3.4.5 200
+[debug] [2026-04-29T13:36:00.935Z] <<< [apiv2][body] GET https://storage.googleapis.com/firemat-preview-drop/emulator/dataconnect-emulator-windows-amd64-v3.4.5 [stream]
+[debug] [2026-04-29T13:36:02.763Z] <<< [apiv2][status] GET https://firebase.googleapis.com/v1beta1/projects 200
+[debug] [2026-04-29T13:36:02.765Z] <<< [apiv2][body] GET https://firebase.googleapis.com/v1beta1/projects [omitted]

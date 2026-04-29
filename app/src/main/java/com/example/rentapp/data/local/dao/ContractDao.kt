@@ -21,6 +21,9 @@ interface ContractDao {
     @Query("SELECT * FROM contracts WHERE status = 'ACTIVE'")
     fun getActiveContracts(): Flow<List<Contract>>
 
+    @Query("SELECT * FROM contracts")
+    suspend fun getAllContractsSync(): List<Contract>
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertContract(contract: Contract): Long
 
@@ -29,4 +32,10 @@ interface ContractDao {
 
     @Delete
     suspend fun deleteContract(contract: Contract)
+
+    @Query("SELECT * FROM contracts WHERE remoteId IS NULL")
+    suspend fun getUnsyncedContracts(): List<Contract>
+
+    @Query("SELECT * FROM contracts WHERE remoteId = :remoteId LIMIT 1")
+    suspend fun getContractByRemoteId(remoteId: String): Contract?
 }

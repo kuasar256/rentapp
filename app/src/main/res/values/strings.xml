@@ -1,3 +1,215 @@
 <resources>
-    <string name="app_name">rentapp</string>
+    <string name="app_name">RentApp</string>
+    <string name="login_panel_title">Panel de Control</string>
+    <string name="login_panel_subtitle">Gestión de Propiedades</string>
+    <string name="login_with">Inicia sesión con:</string>
+    <string name="login_google">Continuar con Google</string>
+    <string name="or">o</string>
+    <string name="login_email">Usa tu correo electrónico:</string>
+    <string name="email">Correo Electrónico</string>
+    <string name="password">Contraseña</string>
+    <string name="error_fill_all_fields">Por favor completa todos los campos</string>
+    <string name="login_btn">Iniciar Sesión</string>
+    <string name="no_account">¿No tienes cuenta? </string>
+    <string name="register">Regístrate</string>
+    <string name="user_profile">Perfil de Usuario</string>
+    <string name="logout">Cerrar Sesión</string>
+    <string name="properties">Propiedades</string>
+    <string name="tenants">Inquilinos</string>
+    <string name="payments">Pagos</string>
+    <string name="search_hint">Buscar...</string>
+    
+    <!-- Dashboard -->
+    <string name="dashboard_title">Panel de Control</string>
+    <string name="dashboard_subtitle">Gestión de Propiedades</string>
+    <string name="dashboard_monthly_revenue">INGRESOS MENSUALES</string>
+    <string name="dashboard_properties_rented">Propiedades Rentadas</string>
+    <string name="dashboard_properties">Propiedades</string>
+    <string name="dashboard_tenants">Inquilinos</string>
+    <string name="dashboard_available">Disponibles</string>
+    <string name="dashboard_overdue">Atrasados</string>
+    <string name="dashboard_quick_actions">Acciones Rápidas</string>
+    <string name="dashboard_view_properties">Ver\nPropiedades</string>
+    <string name="dashboard_view_tenants">Ver\nInquilinos</string>
+    <string name="dashboard_view_reports">Ver\nReportes</string>
+    <string name="dashboard_delinquency_alerts">Alertas de Morosidad</string>
+    <string name="dashboard_overdue_payments_warning">%1$d pagos con retraso requieren atención</string>
+
+    <!-- Annual Report -->
+    <string name="annual_report_title">Reporte Anual</string>
+    <string name="annual_report_monthly_breakdown">DESGLOSE MENSUAL</string>
+    <string name="annual_report_export_button">EXPORTAR REPORTE ANUAL</string>
+    <string name="annual_report_summary">Resumen del Año</string>
+    <string name="annual_report_total_collected">Total Recaudado</string>
+
+    <!-- Months -->
+    <string name="month_jan">Enero</string>
+    <string name="month_feb">Febrero</string>
+    <string name="month_mar">Marzo</string>
+    <string name="month_apr">Abril</string>
+    <string name="month_may">Mayo</string>
+    <string name="month_jun">Junio</string>
+    <string name="month_jul">Julio</string>
+    <string name="month_aug">Agosto</string>
+    <string name="month_sep">Septiembre</string>
+    <string name="month_oct">Octubre</string>
+    <string name="month_nov">Noviembre</string>
+    <string name="month_dec">Diciembre</string>
+
+    <!-- Delinquency Alerts -->
+    <string name="delinquency_title">Alertas de Morosidad</string>
+    <string name="delinquency_overdue_payments">%1$d Pagos Atrasados</string>
+    <string name="delinquency_empty_title">¡Sin morosos! 🎉</string>
+    <string name="delinquency_empty_msg">Todos los pagos están al corriente.</string>
+    <string name="delinquency_days_overdue">%1$d días de retraso</string>
+    <string name="delinquency_mark_paid">Marcar como Pagado</string>
+    <string name="delinquency_total_debt">Total Deuda</string>
+
+    <!-- Add/Edit Property -->
+    <string name="edit">Editar</string>
+    <string name="edit_property">Editar Vivienda</string>
+    <string name="add_property">Agregar Vivienda</string>
+    <string name="back">Regresar</string>
+    <string name="property_info">Información de la Propiedad</string>
+    <string name="property_name">Nombre de la Propiedad</string>
+    <string name="property_type">Tipo de Propiedad</string>
+    <string name="address">Dirección</string>
+    <string name="search_on_map">Buscar en mapa</string>
+    <string name="map_location_title">Ubicación en el Mapa</string>
+    <string name="map_location_hint">Toca el mapa para fijar la ubicación de la propiedad</string>
+    <string name="property_detail_title">Detalle de Propiedad</string>
+    <string name="details">Detalles</string>
+    <string name="monthly_rent">Renta Mensual (%1$s)</string>
+    <string name="rooms">Recámaras</string>
+    <string name="bathrooms">Baños</string>
+    <string name="area">Área (m²)</string>
+    <string name="status">Estado</string>
+    <string name="description_optional">Descripción (opcional)</string>
+    <string name="property_description">Descripción</string>
+    <string name="property_photo">Foto de la Propiedad</string>
+    <string name="tap_to_add_photo">Toca para agregar foto</string>
+    <string name="save_changes">Guardar Cambios</string>
+    <string name="add_property_btn">Agregar Propiedad</string>
+    
+    <!-- Property Status -->
+    <string name="status_available">Disponible</string>
+    <string name="status_rented">Rentada</string>
+    <string name="status_maintenance">Mantenimiento</string>
+    
+    <!-- Property Types -->
+    <string name="type_house">Casa</string>
+    <string name="type_apartment">Departamento</string>
+    <string name="type_commercial">Local Comercial</string>
+    <string name="type_office">Oficina</string>
+    <string name="type_warehouse">Bodega</string>
+    <string name="type_land">Terreno</string>
+
+    <!-- Add/Edit Tenant -->
+    <string name="add_tenant">Agregar Inquilino</string>
+    <string name="edit_tenant">Editar Inquilino</string>
+    <string name="personal_data">Datos Personales</string>
+    <string name="first_name">Nombre(s)</string>
+    <string name="last_name">Apellidos</string>
+    <string name="email_label">Correo Electrónico</string>
+    <string name="phone_label">Teléfono</string>
+    <string name="occupation_label">Ocupación / Empresa</string>
+    <string name="monthly_income">Ingreso Mensual (%1$s)</string>
+    <string name="identification">Identificación</string>
+    <string name="id_number">Número de Identificación</string>
+    <string name="nationality_label">Nacionalidad / País de Origen</string>
+    <string name="emergency_contact">Contacto de Emergencia</string>
+    <string name="emergency_contact_name">Nombre de Contacto</string>
+    <string name="emergency_phone">Teléfono de Emergencia</string>
+    <string name="rental_info">Información de Alquiler</string>
+    <string name="rent_due_day">Día de Vencimiento de Pago (1-31)</string>
+    <string name="tenant_photo">Foto del Inquilino</string>
+
+    <!-- Property List -->
+    <string name="properties_list_title">Propiedades</string>
+    <string name="all_filter">Todos</string>
+    <string name="available_filter">Disponibles</string>
+    <string name="rented_filter">Rentados</string>
+    <string name="maintenance_filter">Mantenimiento</string>
+    <string name="no_properties_msg">No hay propiedades registradas.\nToca + para agregar una.</string>
+    <string name="delete_property_title">Eliminar propiedad</string>
+    <string name="delete_property_confirm">¿Seguro que deseas eliminar \"%1$s\"?\nEsta acción no se puede deshacer.</string>
+    <string name="property_deleted_msg">\"%1$s\" eliminada</string>
+    <string name="undo">Deshacer</string>
+    <string name="delete">Eliminar</string>
+    <string name="cancel">Cancelar</string>
+    <string name="view_location_btn">VER UBICACIÓN EN MAPA</string>
+    <string name="view_on_map">Ver Ubicación en Google Maps</string>
+
+    <!-- Tenant List -->
+    <string name="tenants_list_title">Inquilinos</string>
+    <string name="active_filter">Activos</string>
+    <string name="inactive_filter">Inactivos</string>
+    <string name="no_tenants_msg">No hay inquilinos registrados.\nToca + para agregar uno.</string>
+    <string name="delete_tenant_title">Eliminar inquilino</string>
+    <string name="delete_tenant_confirm">¿Seguro que deseas eliminar a \"%1$s\"?\nEsta acción no se puede deshacer.</string>
+    <string name="tenant_deleted_msg">\"%1$s\" eliminado</string>
+    <string name="tenant_detail_title">Detalle de Inquilino</string>
+    <string name="contact_info">Información de Contacto</string>
+    <string name="documentation">Documentación</string>
+    <string name="name_label">Nombre</string>
+    <string name="not_specified">No especificado</string>
+    <string name="status_inactive">Inactivo</string>
+    <string name="contact_tenant">CONTACTAR</string>
+
+    <!-- Contract List -->
+    <string name="contracts_list_title">Contratos</string>
+    <string name="active_contracts">Contratos Activos</string>
+    <string name="pending_contracts">Pendientes</string>
+    <string name="contract_number">Contrato #%1$d</string>
+    <string name="status_active">Activo</string>
+    <string name="no_contracts_msg">No hay contratos registrados.\nToca + para crear uno.</string>
+    <string name="delete_contract_title">Eliminar contrato</string>
+    <string name="delete_contract_confirm">¿Seguro que deseas eliminar este contrato?\nEsta acción no se puede deshacer.</string>
+    <string name="contract_deleted_msg">Contrato eliminado</string>
+
+    <!-- Contract Form -->
+    <string name="add_contract">Nuevo Contrato</string>
+    <string name="contract_details">Detalles del Contrato</string>
+    <string name="tenant">Inquilino</string>
+    <string name="select_tenant">Seleccionar Inquilino</string>
+    <string name="start_date">Fecha de Inicio</string>
+    <string name="end_date">Fecha de Fin</string>
+    <string name="deposit">Depósito de Garantía</string>
+    <string name="payment_due_day">Día de Pago (1-31)</string>
+    <string name="notes_optional">Notas (opcional)</string>
+    <string name="create_contract">Crear Contrato</string>
+    <string name="ok">Aceptar</string>
+
+    <!-- Payment Form -->
+    <string name="add_payment">Registrar Pago</string>
+    <string name="payment_amount">Monto del Pago</string>
+    <string name="payment_date">Fecha de Pago</string>
+    <string name="reference_notes">Referencia / Notas</string>
+    <string name="payment_method">Método de Pago</string>
+    <string name="register_payment">Registrar Pago</string>
+    
+    <!-- Payment Status -->
+    <string name="status_paid">Pagado</string>
+    <string name="status_pending">Pendiente</string>
+    <string name="status_delayed">Atrasado</string>
+    
+    <!-- Dashboard Status refined -->
+    <string name="dashboard_pending">Pendientes</string>
+    <string name="dashboard_paid_this_month">Pagados este mes</string>
+    <string name="rent_property_action">Rentar Propiedad</string>
+    <string name="register_tenant_for_rent">Registro de Inquilino</string>
+    <string name="next_create_contract">Continuar al Contrato</string>
+    <string name="past_contracts">Historial de Contratos</string>
+
+    <!-- Terms and Conditions -->
+    <string name="terms_title">Términos y Condiciones</string>
+    <string name="terms_content">Al utilizar esta aplicación para la gestión de rentas, usted acepta los siguientes términos:\n\n1. Gestión de Datos: Los datos de inquilinos y contratos se almacenan de forma local en su dispositivo.\n2. Responsabilidad: El usuario es responsable de la exactitud de los montos y fechas ingresados.\n3. Privacidad: La aplicación no comparte información sensible con terceros sin su consentimiento explícito.\n4. Políticas de Google: Se respetan las normas de seguridad y privacidad de Google Play Services.\n5. Cláusulas: Las cláusulas de allanamiento y penalizaciones son sugerencias legales sujetas a la legislación local de su país.</string>
+    <string name="privacy_policy_link">Política de Privacidad de la Aplicación</string>
+    <string name="accept_terms">He leído y acepto los términos y condiciones de uso.</string>
+    <string name="must_accept_terms">Debes aceptar los términos para continuar</string>
+
+    <!-- Fraud Prevention & Notifications -->
+    <string name="notification_property_rented_title">¡Propiedad Rentada!</string>
+    <string name="notification_property_rented_body">La propiedad \"%1$s\" ha sido rentada exitosamente a %2$s.</string>
+    <string name="fraud_prevention_notice">Recuerde: Para su seguridad, toda comunicación y registro de pagos debe realizarse exclusivamente a través de esta plataforma.</string>
 </resources>

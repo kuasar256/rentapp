@@ -35,4 +35,13 @@ interface PropertyDao {
 
     @Query("SELECT COUNT(*) FROM properties")
     fun getTotalCount(): Flow<Int>
+
+    @Query("SELECT COUNT(*) FROM properties")
+    suspend fun getPropertyCountSync(): Int
+
+    @Query("SELECT * FROM properties WHERE remoteId IS NULL")
+    suspend fun getUnsyncedProperties(): List<Property>
+
+    @Query("SELECT * FROM properties WHERE remoteId = :remoteId LIMIT 1")
+    suspend fun getPropertyByRemoteId(remoteId: String): Property?
 }

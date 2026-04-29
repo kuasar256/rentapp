@@ -52,6 +52,10 @@ val InverseSurface = Color(0xFFF9F9F9)
 val InverseOnSurface = Color(0xFF555555)
 val InversePrimary = Color(0xFF106F00)
 
+// Warning (Yellow/Gold)
+val WarningContainer = Color(0xFF332B00)
+val OnWarningContainer = Color(0xFFFFE082)
+
 // Gradient
 val NeonGradientStart = Color(0xFF8EFF71)
 val NeonGradientEnd = Color(0xFF2FF801)

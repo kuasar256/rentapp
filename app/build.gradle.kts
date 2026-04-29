@@ -3,7 +3,7 @@ plugins {
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.ksp)
-    // alias(libs.plugins.google.services) // Comentado hasta tener google-services.json
+    alias(libs.plugins.google.services)
 }
 
 android {
@@ -71,25 +71,47 @@ dependencies {
     implementation(libs.retrofit)
     implementation(libs.retrofit.converter.gson)
     
-    // Google Maps Compose
-    implementation(libs.maps.compose)
-    implementation(libs.play.services.maps)
+    // OSmdroid Maps
+    implementation("org.osmdroid:osmdroid-android:6.1.18")
     
     // WorkManager
     implementation(libs.androidx.work.runtime.ktx)
+    
+    // Google Play Services Auth (sin Firebase)
+    implementation("com.google.android.gms:play-services-auth:21.0.0")
+    
+    // Credential Manager para Google Sign-In
+    implementation("androidx.credentials:credentials:1.3.0")
+    implementation("androidx.credentials:credentials-play-services-auth:1.3.0")
+    
+    // Coil para cargar imágenes
+    implementation("io.coil-kt:coil-compose:2.6.0")
 
-    // Firebase (Comentado hasta tener google-services.json)
-    // implementation(platform(libs.firebase.bom))
-    // implementation(libs.firebase.auth)
-    // implementation(libs.firebase.firestore)
-    // implementation(libs.firebase.analytics)
+    // Firebase
+    implementation(platform(libs.firebase.bom))
+    implementation(libs.firebase.auth)
+    implementation(libs.firebase.firestore)
+    implementation(libs.firebase.analytics)
+    implementation(libs.firebase.messaging)
 
+    // Biometric
+    implementation(libs.androidx.biometric)
 
+    // Unit Tests
     testImplementation(libs.junit)
+    testImplementation(libs.mockk.android)
+    testImplementation(libs.mockk.agent)
+    testImplementation(libs.turbine)
+    testImplementation(libs.kotlinx.coroutines.test)
+    testImplementation(libs.androidx.arch.core.testing)
+
+    // Android Instrumented Tests
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(platform(libs.androidx.compose.bom))
     androidTestImplementation(libs.androidx.ui.test.junit4)
+    androidTestImplementation(libs.androidx.room.testing)
+    androidTestImplementation(libs.kotlinx.coroutines.test)
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
 }

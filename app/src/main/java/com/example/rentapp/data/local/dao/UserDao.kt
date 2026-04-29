@@ -20,4 +20,7 @@ interface UserDao {
 
     @Delete
     suspend fun deleteUser(user: User)
+
+    @Query("SELECT * FROM users WHERE remoteId = :remoteId LIMIT 1")
+    suspend fun getUserByRemoteId(remoteId: String): User?
 }

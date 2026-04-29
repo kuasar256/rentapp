@@ -9,7 +9,7 @@ import com.example.rentapp.data.local.entity.*
 
 @Database(
     entities = [Property::class, Tenant::class, Contract::class, Payment::class, User::class],
-    version = 1,
+    version = 4,
     exportSchema = false
 )
 abstract class AppDatabase : RoomDatabase() {

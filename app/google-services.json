@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "137999451994",
+    "project_id": "rentapp-8c6ca",
+    "storage_bucket": "rentapp-8c6ca.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:137999451994:android:8cc92fbe3ece70b64d5563",
+        "android_client_info": {
+          "package_name": "com.example.rentapp"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "137999451994-4nr66vt2msl31alungt21ufcmhl4plf6.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.rentapp",
+            "certificate_hash": "321dd70be378eafeea4ed2d73364f6238cbafc07"
+          }
+        },
+        {
+          "client_id": "137999451994-nij807uo6s39dfaod0hkpidk89r62nlm.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBITgq5IYdkW3wm5sD9yEPweWr6tYqjOks"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "137999451994-nij807uo6s39dfaod0hkpidk89r62nlm.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

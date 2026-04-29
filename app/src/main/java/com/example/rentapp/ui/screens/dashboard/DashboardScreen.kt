@@ -20,11 +20,16 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.*
 import androidx.navigation.NavHostController
+import androidx.compose.ui.res.stringResource
+import com.example.rentapp.R
 import com.example.rentapp.ui.navigation.Screen
 import com.example.rentapp.ui.theme.*
+import com.example.rentapp.ui.components.RentAppBottomBar
 import com.example.rentapp.viewmodel.PaymentViewModel
 import com.example.rentapp.viewmodel.PropertyViewModel
 import com.example.rentapp.viewmodel.TenantViewModel
+import com.example.rentapp.viewmodel.UserViewModel
+import com.example.rentapp.viewmodel.ContractViewModel
 import java.text.NumberFormat
 import java.util.Locale
 
@@ -34,8 +39,22 @@ fun DashboardScreen(
     propertyViewModel: PropertyViewModel,
     paymentViewModel: PaymentViewModel,
     tenantViewModel: TenantViewModel,
+    contractViewModel: ContractViewModel,
+    userViewModel: UserViewModel,
     navController: NavHostController
 ) {
+    val userState by userViewModel.user.collectAsState()
+    val userName = userState?.name ?: "Usuario"
+
+    val greeting = remember {
+        val hour = java.util.Calendar.getInstance().get(java.util.Calendar.HOUR_OF_DAY)
+        when {
+            hour < 12 -> "¡Buenos días"
+            hour < 19 -> "¡Buenas tardes"
+            else -> "¡Buenas noches"
+        }
+    }
+
     val totalCount by propertyViewModel.totalCount.collectAsState()
     val availableCount by propertyViewModel.availableCount.collectAsState()
     val rentedCount by propertyViewModel.rentedCount.collectAsState()
@@ -45,7 +64,7 @@ fun DashboardScreen(
     val pendingCount by paymentViewModel.pendingCount.collectAsState()
     val delayedPayments by paymentViewModel.delayedPayments.collectAsState()
     val exchangeRates by propertyViewModel.exchangeRates.collectAsState()
-
+    
     Log.d("RentAppDebug", "DashboardScreen: Composition started")
     
     // Remember formatters to avoid re-creation and add safety
@@ -63,8 +82,12 @@ fun DashboardScreen(
 
     val infiniteTransition = rememberInfiniteTransition(label = "pulse")
     val pulseAlpha by infiniteTransition.animateFloat(
-        initialValue = 0.4f, targetValue = 1f,
-        animationSpec = infiniteRepeatable(tween(1000), RepeatMode.Reverse),
+        initialValue = 0.6f,
+        targetValue = 1.0f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(1500, easing = LinearEasing),
+            repeatMode = RepeatMode.Reverse
+        ),
         label = "pulse"
     )
 
@@ -73,14 +96,17 @@ fun DashboardScreen(
             TopAppBar(
                 title = {
                     Column {
-                        Text("Panel de Control", color = OnBackground, fontWeight = FontWeight.Bold,
+                        Text("$greeting, $userName!", color = OnBackground, fontWeight = FontWeight.Black,
                             style = MaterialTheme.typography.titleLarge)
-                        Text("Gestión de Propiedades", color = OnSurfaceVariant,
+                        Text(stringResource(R.string.dashboard_subtitle), color = OnSurfaceVariant,
                             style = MaterialTheme.typography.labelSmall)
                     }
                 },
                 actions = {
-                    IconButton(onClick = { navController.navigate(Screen.UserProfile.route) }) {
+                    IconButton(
+                        onClick = { navController.navigate(Screen.UserProfile.route) },
+                        modifier = Modifier.background(SurfaceContainer, androidx.compose.foundation.shape.CircleShape)
+                    ) {
                         Icon(Icons.Default.AccountCircle, contentDescription = "Perfil", tint = Primary)
                     }
                 },
@@ -99,121 +125,190 @@ fun DashboardScreen(
         ) {
             // Revenue Hero Card
             item {
-                Card(
-                    modifier = Modifier.fillMaxWidth(),
-                    colors = CardDefaults.cardColors(containerColor = Color.Transparent),
-                    shape = RoundedCornerShape(20.dp)
-                ) {
-                    Box(
+                    Card(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .background(
-                                Brush.linearGradient(listOf(Primary, PrimaryDim)),
-                                RoundedCornerShape(20.dp)
-                            )
-                            .padding(24.dp)
+                            .clip(RoundedCornerShape(24.dp))
+                            .border(
+                                width = 1.dp,
+                                brush = Brush.linearGradient(listOf(Primary.copy(alpha = 0.5f), Color.Transparent)),
+                                shape = RoundedCornerShape(24.dp)
+                            ),
+                        colors = CardDefaults.cardColors(containerColor = SurfaceContainerLowest),
                     ) {
-                        Column {
-                            Text("Ingresos Mensuales", style = MaterialTheme.typography.labelMedium,
-                                color = OnPrimaryFixed.copy(alpha = 0.8f))
-                            Spacer(Modifier.height(8.dp))
-                            val baseRevenue = monthlyRevenue ?: 0.0
-                            val bobRate = exchangeRates["BOB"] ?: 6.96 // Default fallback
-                            
-                            Text(
-                                currencyUsd.format(baseRevenue),
-                                style = MaterialTheme.typography.headlineLarge,
-                                color = OnPrimaryFixed,
-                                fontWeight = FontWeight.Bold
-                            )
-                            Text(
-                                "≈ ${currencyBob.format(baseRevenue * bobRate)}",
-                                style = MaterialTheme.typography.bodyMedium,
-                                color = OnPrimaryFixed.copy(alpha = 0.9f)
-                            )
-                            
-                            Spacer(Modifier.height(4.dp))
-                            Row(verticalAlignment = Alignment.CenterVertically) {
-                                Icon(Icons.Default.TrendingUp, contentDescription = null,
-                                    tint = OnPrimaryFixed.copy(alpha = 0.7f), modifier = Modifier.size(16.dp))
-                                Spacer(Modifier.width(4.dp))
-                                Text("$rentedCount propiedades rentadas", style = MaterialTheme.typography.bodySmall,
-                                    color = OnPrimaryFixed.copy(alpha = 0.8f))
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .background(
+                                    Brush.verticalGradient(
+                                        listOf(Primary.copy(alpha = 0.25f), Primary.copy(alpha = 0.05f), Color.Transparent)
+                                    )
+                                )
+                                .padding(24.dp)
+                        ) {
+                            Column {
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.SpaceBetween,
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Text(
+                                        stringResource(R.string.dashboard_monthly_revenue),
+                                        style = MaterialTheme.typography.labelLarge,
+                                        color = Primary,
+                                        fontWeight = FontWeight.ExtraBold,
+                                        letterSpacing = 2.sp
+                                    )
+                                    Box(
+                                        modifier = Modifier
+                                            .size(8.dp)
+                                            .background(Primary.copy(alpha = pulseAlpha), RoundedCornerShape(50))
+                                    )
+                                }
+                                
+                                Spacer(Modifier.height(16.dp))
+                                val baseRevenue = monthlyRevenue ?: 0.0
+                                val bobRate = exchangeRates["BOB"] ?: 6.96
+                                
+                                Text(
+                                    currencyUsd.format(baseRevenue),
+                                    style = MaterialTheme.typography.displayMedium,
+                                    color = OnBackground,
+                                    fontWeight = FontWeight.Black
+                                )
+                                
+                                Surface(
+                                    modifier = Modifier.padding(top = 4.dp),
+                                    color = Primary.copy(alpha = 0.1f),
+                                    shape = RoundedCornerShape(8.dp)
+                                ) {
+                                    Text(
+                                        " ≈ ${currencyBob.format(baseRevenue * bobRate)} ",
+                                        style = MaterialTheme.typography.titleMedium,
+                                        color = Primary,
+                                        fontWeight = FontWeight.Bold,
+                                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
+                                    )
+                                }
+                                
+                                Spacer(Modifier.height(20.dp))
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.SpaceBetween
+                                ) {
+                                    Row(verticalAlignment = Alignment.CenterVertically) {
+                                        Icon(Icons.Default.TrendingUp, contentDescription = null,
+                                            tint = Primary, modifier = Modifier.size(18.dp))
+                                        Spacer(Modifier.width(8.dp))
+                                        Text("$rentedCount " + stringResource(R.string.dashboard_properties_rented), 
+                                            style = MaterialTheme.typography.bodyMedium,
+                                            color = OnSurfaceVariant)
+                                    }
+                                }
                             }
                         }
                     }
                 }
-            }
 
             // Stats Row
             item {
                 Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                    StatCard(
-                        modifier = Modifier.weight(1f),
-                        label = "Propiedades",
-                        value = totalCount.toString(),
-                        icon = Icons.Default.Home,
-                        accent = Primary
-                    )
-                    StatCard(
-                        modifier = Modifier.weight(1f),
-                        label = "Inquilinos",
-                        value = activeTenantsCount.toString(),
-                        icon = Icons.Default.People,
-                        accent = Secondary
-                    )
+                        StatCard(
+                            modifier = Modifier.weight(1f),
+                            label = stringResource(R.string.dashboard_properties),
+                            value = totalCount.toString(),
+                            icon = Icons.Default.Home,
+                            accent = Primary
+                        )
+                        StatCard(
+                            modifier = Modifier.weight(1f),
+                            label = stringResource(R.string.dashboard_tenants),
+                            value = activeTenantsCount.toString(),
+                            icon = Icons.Default.People,
+                            accent = Secondary
+                        )
+                    }
                 }
-            }
 
             item {
-                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                    StatCard(
-                        modifier = Modifier.weight(1f),
-                        label = "Disponibles",
-                        value = availableCount.toString(),
-                        icon = Icons.Default.CheckCircle,
-                        accent = Tertiary,
-                        showPulse = availableCount > 0,
-                        pulseAlpha = pulseAlpha
-                    )
-                    StatCard(
-                        modifier = Modifier.weight(1f),
-                        label = "Atrasados",
-                        value = (delayedCount + pendingCount).toString(),
-                        icon = Icons.Default.Warning,
-                        accent = Error
-                    )
+                    val currentYearPaid by paymentViewModel.paidCountByYear.collectAsState()
+                    val currentYearPending by paymentViewModel.pendingCountByYear.collectAsState()
+                    val currentYearDelayed by paymentViewModel.delayedCountByYear.collectAsState()
+                    
+                    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                            StatCard(
+                                modifier = Modifier.weight(1f),
+                                label = stringResource(R.string.dashboard_available),
+                                value = availableCount.toString(),
+                                icon = Icons.Default.CheckCircle,
+                                accent = Tertiary,
+                                showPulse = availableCount > 0
+                            )
+                            StatCard(
+                                modifier = Modifier.weight(1f),
+                                label = stringResource(R.string.status_paid),
+                                value = currentYearPaid.toString(),
+                                icon = Icons.Default.Payments,
+                                accent = Color(0xFF4CAF50) // Green
+                            )
+                        }
+                        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                            StatCard(
+                                modifier = Modifier.weight(1f),
+                                label = stringResource(R.string.status_pending),
+                                value = currentYearPending.toString(),
+                                icon = Icons.Default.Schedule,
+                                accent = Color(0xFFFFC107) // Amber
+                            )
+                            StatCard(
+                                modifier = Modifier.weight(1f),
+                                label = stringResource(R.string.status_delayed),
+                                value = currentYearDelayed.toString(),
+                                icon = Icons.Default.Warning,
+                                accent = Error
+                            )
+                        }
+                    }
                 }
-            }
 
-            // Quick Actions
+            // Acciones Rápidas
             item {
-                Text("Acciones Rápidas", style = MaterialTheme.typography.titleMedium,
-                    color = OnBackground, fontWeight = FontWeight.SemiBold)
-                Spacer(Modifier.height(12.dp))
-                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                    QuickActionButton(
-                        modifier = Modifier.weight(1f), label = "Agregar\nVivienda",
-                        icon = Icons.Default.AddHome, onClick = { navController.navigate(Screen.AddProperty.route) }
-                    )
-                    QuickActionButton(
-                        modifier = Modifier.weight(1f), label = "Agregar\nInquilino",
-                        icon = Icons.Default.PersonAdd, onClick = { navController.navigate(Screen.AddTenant.route) }
-                    )
-                    QuickActionButton(
-                        modifier = Modifier.weight(1f), label = "Ver\nReportes",
-                        icon = Icons.Default.BarChart, onClick = { navController.navigate(Screen.AnnualReports.route) }
-                    )
+                Column {
+                    Text(stringResource(R.string.dashboard_quick_actions), style = MaterialTheme.typography.titleMedium,
+                        color = OnBackground, fontWeight = FontWeight.SemiBold)
+                    Spacer(Modifier.height(12.dp))
+                    
+                    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                                QuickActionButton(
+                                    modifier = Modifier.weight(1f), label = stringResource(R.string.add_property),
+                                    icon = Icons.Default.AddHome, onClick = { navController.navigate(Screen.AddProperty.route) }
+                                )
+                                QuickActionButton(
+                                    modifier = Modifier.weight(1f), label = stringResource(R.string.add_tenant),
+                                    icon = Icons.Default.PersonAdd, onClick = { navController.navigate(Screen.AddTenant.route) }
+                                )
+                                Spacer(modifier = Modifier.weight(1f))
+                            }
+                        }
+                    }
                 }
-            }
 
             // Delayed payments alert
             if (delayedPayments.isNotEmpty()) {
                 item {
                     Card(
-                        modifier = Modifier.fillMaxWidth().clickable { navController.navigate(Screen.DelinquencyAlerts.route) },
-                        colors = CardDefaults.cardColors(containerColor = ErrorContainer.copy(alpha = 0.3f)),
-                        shape = RoundedCornerShape(12.dp)
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clip(RoundedCornerShape(12.dp))
+                            .border(
+                                width = 1.dp,
+                                color = Error.copy(alpha = pulseAlpha),
+                                shape = RoundedCornerShape(12.dp)
+                            )
+                            .clickable { navController.navigate(Screen.DelinquencyAlerts.route) },
+                        colors = CardDefaults.cardColors(containerColor = ErrorContainer.copy(alpha = 0.2f * pulseAlpha + 0.1f)),
                     ) {
                         Row(
                             modifier = Modifier.padding(16.dp),
@@ -222,9 +317,9 @@ fun DashboardScreen(
                             Icon(Icons.Default.Warning, contentDescription = null, tint = Error, modifier = Modifier.size(24.dp))
                             Spacer(Modifier.width(12.dp))
                             Column(Modifier.weight(1f)) {
-                                Text("Alertas de Morosidad", color = Error, fontWeight = FontWeight.SemiBold,
+                                Text(stringResource(R.string.dashboard_delinquency_alerts), color = Error, fontWeight = FontWeight.SemiBold,
                                     style = MaterialTheme.typography.titleSmall)
-                                Text("${delayedPayments.size} pagos con retraso requieren atención",
+                                Text(stringResource(R.string.dashboard_overdue_payments_warning, delayedPayments.size),
                                     color = OnSurfaceVariant, style = MaterialTheme.typography.bodySmall)
                             }
                             Icon(Icons.Default.ChevronRight, contentDescription = null, tint = Error)
@@ -245,13 +340,20 @@ private fun StatCard(
     value: String,
     icon: ImageVector,
     accent: Color,
-    showPulse: Boolean = false,
-    pulseAlpha: Float = 1f
+    showPulse: Boolean = false
 ) {
     Card(
-        modifier = modifier,
-        colors = CardDefaults.cardColors(containerColor = SurfaceContainer),
-        shape = RoundedCornerShape(16.dp)
+        modifier = modifier
+            .clip(RoundedCornerShape(20.dp))
+            .border(
+                width = 1.dp,
+                brush = Brush.linearGradient(
+                    listOf(Color.White.copy(alpha = 0.2f), Color.Transparent)
+                ),
+                shape = RoundedCornerShape(20.dp)
+            ),
+        colors = CardDefaults.cardColors(containerColor = SurfaceContainer.copy(alpha = 0.4f)),
+        shape = RoundedCornerShape(20.dp)
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
@@ -261,7 +363,7 @@ private fun StatCard(
                     Box(
                         modifier = Modifier
                             .size(8.dp)
-                            .background(accent.copy(alpha = pulseAlpha), RoundedCornerShape(50))
+                            .background(accent.copy(alpha = 0.6f), RoundedCornerShape(50))
                     )
                 }
             }
@@ -280,90 +382,27 @@ private fun QuickActionButton(
     onClick: () -> Unit
 ) {
     Card(
-        modifier = modifier.clickable(onClick = onClick),
-        colors = CardDefaults.cardColors(containerColor = SurfaceContainerHigh),
-        shape = RoundedCornerShape(12.dp)
+        modifier = modifier
+            .clip(RoundedCornerShape(16.dp))
+            .border(
+                width = 1.dp,
+                brush = Brush.linearGradient(
+                    listOf(Color.White.copy(alpha = 0.2f), Color.Transparent)
+                ),
+                shape = RoundedCornerShape(16.dp)
+            )
+            .clickable(onClick = onClick),
+        colors = CardDefaults.cardColors(containerColor = SurfaceContainer.copy(alpha = 0.4f)),
+        shape = RoundedCornerShape(16.dp)
     ) {
         Column(
-            modifier = Modifier.padding(12.dp).fillMaxWidth(),
+            modifier = Modifier.padding(16.dp).fillMaxWidth(),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Icon(icon, contentDescription = null, tint = Primary, modifier = Modifier.size(24.dp))
+            Icon(icon, contentDescription = null, tint = Primary, modifier = Modifier.size(28.dp))
             Spacer(Modifier.height(8.dp))
-            Text(label, style = MaterialTheme.typography.labelSmall, color = OnBackground,
-                textAlign = androidx.compose.ui.text.style.TextAlign.Center)
+            Text(label, style = MaterialTheme.typography.labelMedium, color = OnBackground,
+                textAlign = androidx.compose.ui.text.style.TextAlign.Center, fontWeight = FontWeight.Bold)
         }
-    }
-}
-
-@Composable
-fun RentAppBottomBar(navController: NavHostController) {
-    val currentRoute = navController.currentBackStackEntry?.destination?.route
-    NavigationBar(containerColor = SurfaceContainer) {
-        NavigationBarItem(
-            selected = currentRoute == Screen.Dashboard.route,
-            onClick = { navController.navigate(Screen.Dashboard.route) { launchSingleTop = true } },
-            icon = { Icon(Icons.Default.Home, contentDescription = null) },
-            label = { Text("Inicio") },
-            colors = NavigationBarItemDefaults.colors(
-                selectedIconColor = OnPrimaryFixed,
-                indicatorColor = Primary,
-                unselectedIconColor = OnSurfaceVariant,
-                unselectedTextColor = OnSurfaceVariant,
-                selectedTextColor = Primary
-            )
-        )
-        NavigationBarItem(
-            selected = currentRoute == Screen.PropertyList.route,
-            onClick = { navController.navigate(Screen.PropertyList.route) { launchSingleTop = true } },
-            icon = { Icon(Icons.Default.Domain, contentDescription = null) },
-            label = { Text("Propiedades") },
-            colors = NavigationBarItemDefaults.colors(
-                selectedIconColor = OnPrimaryFixed,
-                indicatorColor = Primary,
-                unselectedIconColor = OnSurfaceVariant,
-                unselectedTextColor = OnSurfaceVariant,
-                selectedTextColor = Primary
-            )
-        )
-        NavigationBarItem(
-            selected = currentRoute == Screen.TenantList.route,
-            onClick = { navController.navigate(Screen.TenantList.route) { launchSingleTop = true } },
-            icon = { Icon(Icons.Default.People, contentDescription = null) },
-            label = { Text("Inquilinos") },
-            colors = NavigationBarItemDefaults.colors(
-                selectedIconColor = OnPrimaryFixed,
-                indicatorColor = Primary,
-                unselectedIconColor = OnSurfaceVariant,
-                unselectedTextColor = OnSurfaceVariant,
-                selectedTextColor = Primary
-            )
-        )
-        NavigationBarItem(
-            selected = currentRoute == Screen.PaymentList.route,
-            onClick = { navController.navigate(Screen.PaymentList.route) { launchSingleTop = true } },
-            icon = { Icon(Icons.Default.Payments, contentDescription = null) },
-            label = { Text("Pagos") },
-            colors = NavigationBarItemDefaults.colors(
-                selectedIconColor = OnPrimaryFixed,
-                indicatorColor = Primary,
-                unselectedIconColor = OnSurfaceVariant,
-                unselectedTextColor = OnSurfaceVariant,
-                selectedTextColor = Primary
-            )
-        )
-        NavigationBarItem(
-            selected = currentRoute == Screen.AnnualReports.route,
-            onClick = { navController.navigate(Screen.AnnualReports.route) { launchSingleTop = true } },
-            icon = { Icon(Icons.Default.BarChart, contentDescription = null) },
-            label = { Text("Reportes") },
-            colors = NavigationBarItemDefaults.colors(
-                selectedIconColor = OnPrimaryFixed,
-                indicatorColor = Primary,
-                unselectedIconColor = OnSurfaceVariant,
-                unselectedTextColor = OnSurfaceVariant,
-                selectedTextColor = Primary
-            )
-        )
     }
 }

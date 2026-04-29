@@ -69,6 +69,13 @@ class PropertyViewModel(private val repository: PropertyRepository) : ViewModel(
     fun deleteProperty(property: Property) = viewModelScope.launch {
         repository.deleteProperty(property)
     }
+
+    fun updatePropertyStatus(propertyId: Long, newStatus: String) = viewModelScope.launch {
+        val property = allProperties.value.find { it.id == propertyId }
+        property?.let {
+            repository.updateProperty(it.copy(status = newStatus))
+        }
+    }
 }
 
 class PropertyViewModelFactory(private val repository: PropertyRepository) : ViewModelProvider.Factory {

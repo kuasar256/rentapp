@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">RentApp</string>
+    <string name="login_panel_title">Tableau de Bord</string>
+    <string name="login_panel_subtitle">Gestion Immobilière</string>
+    <string name="login_with">Se connecter avec :</string>
+    <string name="login_google">Continuer avec Google</string>
+    <string name="or">ou</string>
+    <string name="login_email">Utilisez votre e-mail :</string>
+    <string name="email">E-mail</string>
+    <string name="password">Mot de passe</string>
+    <string name="error_fill_all_fields">Veuillez remplir tous les champs</string>
+    <string name="login_btn">Se connecter</string>
+    <string name="no_account">Pas encore de compte ? </string>
+    <string name="register">S\'inscrire</string>
+    <string name="user_profile">Profil de l\'Utilisateur</string>
+    <string name="logout">Se déconnecter</string>
+    <string name="properties">Propriétés</string>
+    <string name="tenants">Locataires</string>
+    <string name="payments">Paiements</string>
+
+    <!-- Dashboard -->
+    <string name="dashboard_title">Tableau de Bord</string>
+    <string name="dashboard_subtitle">Gestion Immobilière</string>
+    <string name="dashboard_monthly_revenue">REVENUS MENSUELS</string>
+    <string name="dashboard_properties_rented">Propriétés Louées</string>
+    <string name="dashboard_properties">Propriétés</string>
+    <string name="dashboard_tenants">Locataires</string>
+    <string name="dashboard_available">Disponibles</string>
+    <string name="dashboard_overdue">En retard</string>
+    <string name="dashboard_quick_actions">Actions Rapides</string>
+    <string name="dashboard_view_properties">Voir\nPropriétés</string>
+    <string name="dashboard_view_tenants">Voir\nLocataires</string>
+    <string name="dashboard_view_reports">Voir\nRapports</string>
+    <string name="dashboard_delinquency_alerts">Alertes d\'Impayés</string>
+    <string name="dashboard_overdue_payments_warning">%1$d paiements en retard nécessitent une attention</string>
+
+    <!-- Annual Report -->
+    <string name="annual_report_title">Rapport Annuel</string>
+    <string name="annual_report_monthly_breakdown">RÉPARTITION MENSUELLE</string>
+    <string name="annual_report_export_button">EXPORTER LE RAPPORT ANNUEL</string>
+    <string name="annual_report_summary">Résumé de l\'Année</string>
+    <string name="annual_report_total_collected">Total Collecté</string>
+
+    <!-- Months -->
+    <string name="month_jan">Janvier</string>
+    <string name="month_feb">Février</string>
+    <string name="month_mar">Mars</string>
+    <string name="month_apr">Avril</string>
+    <string name="month_may">Mai</string>
+    <string name="month_jun">Juin</string>
+    <string name="month_jul">Juillet</string>
+    <string name="month_aug">Août</string>
+    <string name="month_sep">Septembre</string>
+    <string name="month_oct">Octobre</string>
+    <string name="month_nov">Novembre</string>
+    <string name="month_dec">Décembre</string>
+
+    <!-- Delinquency Alerts -->
+    <string name="delinquency_title">Alertes d\'Impayés</string>
+    <string name="delinquency_overdue_payments">%1$d Paiements en Retard</string>
+    <string name="delinquency_empty_title">Aucun impayé ! 🎉</string>
+    <string name="delinquency_empty_msg">Tous les paiements sont à jour.</string>
+    <string name="delinquency_days_overdue">%1$d jours de retard</string>
+    <string name="delinquency_mark_paid">Marquer comme Payé</string>
+    <string name="delinquency_total_debt">Dette Totale</string>
+</resources>

@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">RentApp</string>
+    <string name="login_panel_title">Dashboard</string>
+    <string name="login_panel_subtitle">Immobilienverwaltung</string>
+    <string name="login_with">Anmelden mit:</string>
+    <string name="login_google">Mit Google fortfahren</string>
+    <string name="or">oder</string>
+    <string name="login_email">E-Mail verwenden:</string>
+    <string name="email">E-Mail</string>
+    <string name="password">Passwort</string>
+    <string name="error_fill_all_fields">Bitte füllen Sie alle Felder aus</string>
+    <string name="login_btn">Anmelden</string>
+    <string name="no_account">Haben Sie kein Konto? </string>
+    <string name="register">Registrieren</string>
+    <string name="user_profile">Benutzerprofil</string>
+    <string name="logout">Abmelden</string>
+    <string name="properties">Immobilien</string>
+    <string name="tenants">Mieter</string>
+    <string name="payments">Zahlungen</string>
+
+    <!-- Dashboard -->
+    <string name="dashboard_title">Dashboard</string>
+    <string name="dashboard_subtitle">Immobilienverwaltung</string>
+    <string name="dashboard_monthly_revenue">MONATLICHE EINNAHMEN</string>
+    <string name="dashboard_properties_rented">Vermietete Immobilien</string>
+    <string name="dashboard_properties">Immobilien</string>
+    <string name="dashboard_tenants">Mieter</string>
+    <string name="dashboard_available">Verfügbar</string>
+    <string name="dashboard_overdue">Überfällig</string>
+    <string name="dashboard_quick_actions">Schnellaktionen</string>
+    <string name="dashboard_view_properties">Immobilien\nanzeigen</string>
+    <string name="dashboard_view_tenants">Mieter\nanzeigen</string>
+    <string name="dashboard_view_reports">Berichte\nanzeigen</string>
+    <string name="dashboard_delinquency_alerts">Zahlungsverzug-Warnungen</string>
+    <string name="dashboard_overdue_payments_warning">%1$d überfällige Zahlungen erfordern Aufmerksamkeit</string>
+
+    <!-- Annual Report -->
+    <string name="annual_report_title">Jahresbericht</string>
+    <string name="annual_report_monthly_breakdown">MONATLICHE ÜBERSICHT</string>
+    <string name="annual_report_export_button">JAHRESBERICHT EXPORTIEREN</string>
+    <string name="annual_report_summary">Jahresübersicht</string>
+    <string name="annual_report_total_collected">Gesamteinnahmen</string>
+
+    <!-- Months -->
+    <string name="month_jan">Januar</string>
+    <string name="month_feb">Februar</string>
+    <string name="month_mar">März</string>
+    <string name="month_apr">April</string>
+    <string name="month_may">Mai</string>
+    <string name="month_jun">Juni</string>
+    <string name="month_jul">Juli</string>
+    <string name="month_aug">August</string>
+    <string name="month_sep">September</string>
+    <string name="month_oct">Oktober</string>
+    <string name="month_nov">November</string>
+    <string name="month_dec">Dezember</string>
+
+    <!-- Delinquency Alerts -->
+    <string name="delinquency_title">Zahlungsverzug-Warnungen</string>
+    <string name="delinquency_overdue_payments">%1$d überfällige Zahlungen</string>
+    <string name="delinquency_empty_title">Keine Schuldner! 🎉</string>
+    <string name="delinquency_empty_msg">Alle Zahlungen sind auf dem neuesten Stand.</string>
+    <string name="delinquency_days_overdue">%1$d Tage Verzug</string>
+    <string name="delinquency_mark_paid">Als bezahlt markieren</string>
+    <string name="delinquency_total_debt">Gesamtschulden</string>
+</resources>

@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">RentApp</string>
+    <string name="login_panel_title">Dashboard</string>
+    <string name="login_panel_subtitle">Property Management</string>
+    <string name="login_with">Sign in with:</string>
+    <string name="login_google">Continue with Google</string>
+    <string name="or">or</string>
+    <string name="login_email">Use your email:</string>
+    <string name="email">Email Address</string>
+    <string name="password">Password</string>
+    <string name="error_fill_all_fields">Please fill in all fields</string>
+    <string name="login_btn">Sign In</string>
+    <string name="no_account">Don\'t have an account? </string>
+    <string name="register">Register</string>
+    <string name="user_profile">User Profile</string>
+    <string name="logout">Sign Out</string>
+    <string name="properties">Properties</string>
+    <string name="tenants">Tenants</string>
+    <string name="payments">Payments</string>
+
+    <!-- Dashboard -->
+    <string name="dashboard_title">Dashboard</string>
+    <string name="dashboard_subtitle">Property Management</string>
+    <string name="dashboard_monthly_revenue">MONTHLY REVENUE</string>
+    <string name="dashboard_properties_rented">Properties Rented</string>
+    <string name="dashboard_properties">Properties</string>
+    <string name="dashboard_tenants">Tenants</string>
+    <string name="dashboard_available">Available</string>
+    <string name="dashboard_overdue">Overdue</string>
+    <string name="dashboard_quick_actions">Quick Actions</string>
+    <string name="dashboard_view_properties">View\nProperties</string>
+    <string name="dashboard_view_tenants">View\nTenants</string>
+    <string name="dashboard_view_reports">View\nReports</string>
+    <string name="dashboard_delinquency_alerts">Delinquency Alerts</string>
+    <string name="dashboard_overdue_payments_warning">%1$d overdue payments require attention</string>
+
+    <!-- Annual Report -->
+    <string name="annual_report_title">Annual Report</string>
+    <string name="annual_report_monthly_breakdown">MONTHLY BREAKDOWN</string>
+    <string name="annual_report_export_button">EXPORT ANNUAL REPORT</string>
+    <string name="annual_report_summary">Year Summary</string>
+    <string name="annual_report_total_collected">Total Collected</string>
+
+    <!-- Months -->
+    <string name="month_jan">January</string>
+    <string name="month_feb">February</string>
+    <string name="month_mar">March</string>
+    <string name="month_apr">April</string>
+    <string name="month_may">May</string>
+    <string name="month_jun">June</string>
+    <string name="month_jul">July</string>
+    <string name="month_aug">August</string>
+    <string name="month_sep">September</string>
+    <string name="month_oct">October</string>
+    <string name="month_nov">November</string>
+    <string name="month_dec">December</string>
+
+    <!-- Delinquency Alerts -->
+    <string name="delinquency_title">Delinquency Alerts</string>
+    <string name="delinquency_overdue_payments">%1$d Overdue Payments</string>
+    <string name="delinquency_empty_title">No delinquents! 🎉</string>
+    <string name="delinquency_empty_msg">All payments are up to date.</string>
+    <string name="delinquency_days_overdue">%1$d days overdue</string>
+    <string name="delinquency_mark_paid">Mark as Paid</string>
+    <string name="delinquency_total_debt">Total Debt</string>
+    <!-- Payment Status -->
+    <string name="status_paid">Paid</string>
+    <string name="status_pending">Pending</string>
+    <string name="status_delayed">Delayed</string>
+    
+    <!-- Dashboard Status refined -->
+    <string name="dashboard_pending">Pending</string>
+    <string name="dashboard_paid_this_month">Paid this month</string>
+</resources>

@@ -10,25 +10,25 @@ import java.util.Calendar
 class PaymentViewModel(private val repository: PaymentRepository) : ViewModel() {
 
     val allPayments = repository.getAllPayments()
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+        .stateIn(viewModelScope, SharingStarted.Lazily, emptyList())
 
     val pendingPayments = repository.getPaymentsByStatus("PENDING")
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+        .stateIn(viewModelScope, SharingStarted.Lazily, emptyList())
 
     val delayedPayments = repository.getDelayedPayments()
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+        .stateIn(viewModelScope, SharingStarted.Lazily, emptyList())
 
     val paidPayments = repository.getPaymentsByStatus("PAID")
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+        .stateIn(viewModelScope, SharingStarted.Lazily, emptyList())
 
     val pendingAndDelayed = repository.getPendingAndDelayedPayments()
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+        .stateIn(viewModelScope, SharingStarted.Lazily, emptyList())
 
     val delayedCount = repository.getDelayedCount()
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 0)
+        .stateIn(viewModelScope, SharingStarted.Lazily, 0)
 
     val pendingCount = repository.getPendingCount()
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 0)
+        .stateIn(viewModelScope, SharingStarted.Lazily, 0)
 
     private val _selectedYear = MutableStateFlow(Calendar.getInstance().get(Calendar.YEAR))
     val selectedYear: StateFlow<Int> = _selectedYear
@@ -40,6 +40,22 @@ class PaymentViewModel(private val repository: PaymentRepository) : ViewModel() 
     val totalCollectedByYear: StateFlow<Double> = _selectedYear
         .flatMapLatest { year -> repository.getTotalCollectedByYear(year) }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 0.0)
+
+    val monthlyEarningsByYear: StateFlow<List<com.example.rentapp.data.local.dao.MonthlyEarning>> = _selectedYear
+        .flatMapLatest { year -> repository.getMonthlyEarningsByYear(year) }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+
+    val paidCountByYear: StateFlow<Int> = _selectedYear
+        .flatMapLatest { year -> repository.getPaidCountByYear(year) }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 0)
+
+    val pendingCountByYear: StateFlow<Int> = _selectedYear
+        .flatMapLatest { year -> repository.getPendingCountByYear(year) }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 0)
+
+    val delayedCountByYear: StateFlow<Int> = _selectedYear
+        .flatMapLatest { year -> repository.getDelayedCountByYear(year) }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 0)
 
     private val _selectedPayment = MutableLiveData<Payment?>()
     val selectedPayment: LiveData<Payment?> = _selectedPayment
@@ -71,6 +87,12 @@ class PaymentViewModel(private val repository: PaymentRepository) : ViewModel() 
 
     fun deletePayment(payment: Payment) = viewModelScope.launch {
         repository.deletePayment(payment)
+    }
+
+    fun clearPaidHistory() = viewModelScope.launch {
+        paidPayments.value.forEach {
+            repository.deletePayment(it)
+        }
     }
 
     fun getPaymentsByContract(contractId: Long): Flow<List<Payment>> =

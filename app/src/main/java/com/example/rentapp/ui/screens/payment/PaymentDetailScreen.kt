@@ -45,8 +45,20 @@ fun PaymentDetailScreen(
     val property = allProperties.find { it.id == currentContract?.propertyId }
     val tenant = allTenants.find { it.id == currentContract?.tenantId }
 
-    val currency = NumberFormat.getCurrencyInstance(Locale("es", "MX"))
-    val dateFormat = SimpleDateFormat("dd 'de' MMMM 'de' yyyy", Locale("es", "MX"))
+    val context = androidx.compose.ui.platform.LocalContext.current
+    val currentCurrency by com.example.rentapp.data.preferences.PreferencesManager.getCurrencyFlow(context).collectAsState(initial = "USD")
+    val currencyFormatter = remember(currentCurrency) {
+        val validCurrency = try {
+            java.util.Currency.getInstance(currentCurrency)
+            currentCurrency
+        } catch (e: Exception) {
+            "USD"
+        }
+        NumberFormat.getCurrencyInstance().apply { 
+            currency = java.util.Currency.getInstance(validCurrency)
+        }
+    }
+    val dateFormat = SimpleDateFormat("dd 'de' MMMM 'de' yyyy", Locale.getDefault())
     val monthNames = listOf("Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre")
 
     Scaffold(
@@ -89,7 +101,7 @@ fun PaymentDetailScreen(
                         Text("${monthNames.getOrElse(payment.month - 1){"?"}} ${payment.year}",
                             style = MaterialTheme.typography.bodyMedium, color = OnSurfaceVariant)
                         Spacer(Modifier.height(16.dp))
-                        Text(currency.format(payment.amount), style = MaterialTheme.typography.displaySmall,
+                        Text(currencyFormatter.format(payment.amount), style = MaterialTheme.typography.displaySmall,
                             color = OnBackground, fontWeight = FontWeight.Bold)
                     }
                 }

@@ -20,8 +20,16 @@ mapsCompose = "6.1.0"
 playServicesMaps = "19.0.0"
 workManager = "2.10.0"
 googleServices = "4.4.4"
-firebaseBom = "34.12.0"
-
+firebaseBom = "33.5.1"
+playServicesAuth = "21.2.0"
+credentials = "1.3.0"
+googleid = "1.1.1"
+# Testing
+mockk = "1.13.10"
+turbine = "1.1.0"
+archCoreTesting = "2.2.0"
+# Biometric
+biometric = "1.1.0"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -58,7 +66,20 @@ firebase-bom = { group = "com.google.firebase", name = "firebase-bom", version.r
 firebase-auth = { group = "com.google.firebase", name = "firebase-auth" }
 firebase-firestore = { group = "com.google.firebase", name = "firebase-firestore" }
 firebase-analytics = { group = "com.google.firebase", name = "firebase-analytics" }
-
+firebase-messaging = { group = "com.google.firebase", name = "firebase-messaging" }
+play-services-auth = { group = "com.google.android.gms", name = "play-services-auth", version.ref = "playServicesAuth" }
+androidx-credentials = { group = "androidx.credentials", name = "credentials", version.ref = "credentials" }
+androidx-credentials-play-services-auth = { group = "androidx.credentials", name = "credentials-play-services-auth", version.ref = "credentials" }
+googleid = { group = "com.google.android.libraries.identity.googleid", name = "googleid", version.ref = "googleid" }
+# Biometric
+androidx-biometric = { group = "androidx.biometric", name = "biometric", version.ref = "biometric" }
+# Testing
+mockk-android = { group = "io.mockk", name = "mockk-android", version.ref = "mockk" }
+mockk-agent = { group = "io.mockk", name = "mockk-agent", version.ref = "mockk" }
+turbine = { group = "app.cash.turbine", name = "turbine", version.ref = "turbine" }
+kotlinx-coroutines-test = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-test", version.ref = "coroutines" }
+androidx-arch-core-testing = { group = "androidx.arch.core", name = "core-testing", version.ref = "archCoreTesting" }
+androidx-room-testing = { group = "androidx.room", name = "room-testing", version.ref = "room" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

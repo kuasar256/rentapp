@@ -29,4 +29,10 @@ interface TenantDao {
 
     @Delete
     suspend fun deleteTenant(tenant: Tenant)
+
+    @Query("SELECT * FROM tenants WHERE remoteId IS NULL")
+    suspend fun getUnsyncedTenants(): List<Tenant>
+
+    @Query("SELECT * FROM tenants WHERE remoteId = :remoteId LIMIT 1")
+    suspend fun getTenantByRemoteId(remoteId: String): Tenant?
 }

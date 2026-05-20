@@ -79,6 +79,7 @@ class TenantViewModel(
         allContracts,
         _statusFilter
     ) { tenants: List<Tenant>, currentPayments: List<Payment>, allOutstanding: List<Payment>, contracts: List<Contract>, filter: String ->
+        // ... (rest of the logic)
         val list = tenants.map { tenant ->
             val tenantContract = contracts.find { it.tenantId == tenant.id }
             

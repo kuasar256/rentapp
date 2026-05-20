@@ -301,20 +301,24 @@ fun NeonTextField(
     visualTransformation: VisualTransformation = VisualTransformation.None,
     keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
     modifier: Modifier = Modifier,
-    enabled: Boolean = true
+    enabled: Boolean = true,
+    isError: Boolean = false,
+    supportingText: @Composable (() -> Unit)? = null
 ) {
     OutlinedTextField(
         value = value,
         onValueChange = onValueChange,
-        label = { Text(label, color = OnSurfaceVariant) },
+        label = { Text(label, color = if (isError) MaterialTheme.colorScheme.error else OnSurfaceVariant) },
         leadingIcon = if (leadingIcon != null) {
-            { Icon(leadingIcon, contentDescription = null, tint = OnSurfaceVariant) }
+            { Icon(leadingIcon, contentDescription = null, tint = if (isError) MaterialTheme.colorScheme.error else OnSurfaceVariant) }
         } else null,
         trailingIcon = trailingIcon,
         visualTransformation = visualTransformation,
         keyboardOptions = keyboardOptions,
         modifier = modifier.fillMaxWidth(),
         enabled = enabled,
+        isError = isError,
+        supportingText = supportingText,
         colors = OutlinedTextFieldDefaults.colors(
             focusedTextColor = OnBackground,
             unfocusedTextColor = OnBackground,
@@ -323,6 +327,9 @@ fun NeonTextField(
             focusedContainerColor = SurfaceContainer,
             unfocusedContainerColor = SurfaceContainer,
             cursorColor = Primary,
+            errorBorderColor = MaterialTheme.colorScheme.error,
+            errorLabelColor = MaterialTheme.colorScheme.error,
+            errorLeadingIconColor = MaterialTheme.colorScheme.error,
             disabledTextColor = OnBackground.copy(alpha = 0.6f),
             disabledBorderColor = OutlineVariant.copy(alpha = 0.3f),
             disabledContainerColor = SurfaceContainer.copy(alpha = 0.5f),

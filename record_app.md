@@ -47,7 +47,13 @@ Este archivo sirve como bitácora para registrar las modificaciones, correccione
 * **Ajuste Formulario:** Se retiró el campo "Tipo de identificación" de la pantalla de agregar inquilino.
 * **Fix Campo Numérico:** Se arregló el comportamiento del campo "Día de Vencimiento de Pago Mensual" para permitir borrar el número e introducir un nuevo valor libremente, sin forzar un "1" por defecto de manera incorrecta.
 
-## [2026-04-28] Flujo de Renta Unificado y Contrato Digital
+## [2026-05-01] Centralización de Presupuestos y Unificación de Monedas
+**Componente:** Reportes (`AnnualReportsScreen.kt`), Gráficas (`AnalyticsCharts.kt`), Propiedades (`PropertyListScreen.kt`)
+* **Unificación de Monedas:** Se corrigió un error en `PropertyListScreen` donde los precios de las propiedades siempre se mostraban en USD (con símbolo $) incluso si el usuario seleccionaba BOB o MXN. Ahora, al igual que en el Dashboard, los precios en la lista de propiedades se convierten en tiempo real según la tasa de cambio actual y muestran el símbolo correcto (Bs. para bolivianos).
+* **Gráfica de Decaimiento de Ingresos (Revenue Decay):** Se implementó una nueva visualización en el reporte anual que muestra cómo los costos estimados de reparaciones (presupuestos) erosionan la base de ingresos totales. Incluye una barra de progreso bicolor (Ingreso Neto vs. Desgaste) y una alerta de "Impacto Crítico" si las reparaciones superan el 30% de los ingresos.
+* **Centralización de Presupuestos:** La pantalla de Reporte Anual ahora sirve como centro de mando para reparaciones, mostrando el "Total Presupuestado" acumulado del año y permitiendo acceso rápido al gestor de presupuestos y creación de nuevas reparaciones.
+* **Fix i18n Re-render:** Se añadió el comando `Activity.recreate()` al cambiar el idioma en el perfil, forzando la recarga inmediata de todos los recursos de texto sin necesidad de reiniciar la app manualmente.
+
 
 **Componente:** `AddContractScreen.kt`, `ContractDetailScreen.kt`, `PropertyDetailScreen.kt`, `TenantDetailScreen.kt`, `RentAppNavGraph.kt`
 

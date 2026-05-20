@@ -26,6 +26,7 @@ import androidx.navigation.NavHostController
 import com.example.rentapp.R
 import com.example.rentapp.data.local.entity.Property
 import com.example.rentapp.ui.theme.*
+import com.example.rentapp.ui.components.EmptyState
 import com.example.rentapp.ui.components.RentAppBottomBar
 import com.example.rentapp.viewmodel.PropertyViewModel
 import coil.compose.AsyncImage
@@ -44,6 +45,7 @@ fun PropertyListScreen(
     onBack: () -> Unit
 ) {
     val allProperties by viewModel.allProperties.collectAsState()
+    val exchangeRates by viewModel.exchangeRates.collectAsState()
     var selectedFilter by remember { mutableStateOf("TODOS") }
 
     val filteredProperties = when (selectedFilter) {
@@ -85,13 +87,26 @@ fun PropertyListScreen(
                         Icon(Icons.Default.ArrowBack, contentDescription = stringResource(R.string.cancel), tint = Primary)
                     }
                 },
-                actions = {
-                    IconButton(onClick = onAddClick) {
-                        Icon(Icons.Default.AddHome, contentDescription = "Agregar Propiedad", tint = Primary)
-                    }
-                },
                 colors = TopAppBarDefaults.topAppBarColors(containerColor = Background)
             )
+        },
+        floatingActionButton = {
+            FloatingActionButton(
+                onClick = onAddClick,
+                containerColor = Primary,
+                contentColor = Background,
+                shape = RoundedCornerShape(16.dp),
+                elevation = FloatingActionButtonDefaults.elevation(8.dp)
+            ) {
+                Row(
+                    modifier = Modifier.padding(horizontal = 16.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Icon(Icons.Default.AddHome, contentDescription = null)
+                    Spacer(Modifier.width(8.dp))
+                    Text(stringResource(R.string.add), fontWeight = FontWeight.Black)
+                }
+            }
         },
 
         bottomBar = {
@@ -140,9 +155,19 @@ fun PropertyListScreen(
             }
 
             if (filteredProperties.isEmpty()) {
+                val (emptyTitle, emptyDesc, emptyIcon) = when (selectedFilter) {
+                    "AVAILABLE"   -> Triple(stringResource(R.string.empty_properties_available_title), stringResource(R.string.empty_properties_available_desc), Icons.Default.HomeWork)
+                    "RENTED"      -> Triple(stringResource(R.string.empty_properties_rented_title), stringResource(R.string.empty_properties_rented_desc), Icons.Default.Handshake)
+                    "MAINTENANCE" -> Triple(stringResource(R.string.empty_properties_maintenance_title), stringResource(R.string.empty_properties_maintenance_desc), Icons.Default.Construction)
+                    else          -> Triple(stringResource(R.string.empty_properties_title), stringResource(R.string.empty_properties_desc), Icons.Default.AddHomeWork)
+                }
+                
                 EmptyState(
-                    message = stringResource(R.string.no_properties_msg),
-                    icon = Icons.Default.HomeWork
+                    message = emptyTitle,
+                    description = emptyDesc,
+                    icon = emptyIcon,
+                    actionLabel = if (selectedFilter == "TODOS") stringResource(R.string.add_property) else null,
+                    onActionClick = onAddClick
                 )
             } else {
                 LazyColumn(
@@ -152,6 +177,7 @@ fun PropertyListScreen(
                     items(filteredProperties, key = { it.id }) { property ->
                         SwipeToDeletePropertyCard(
                             property = property,
+                            exchangeRates = exchangeRates,
                             onClick = { onPropertyClick(property.id) },
                             onDeleteRequested = { propertyToDelete = property }
                         )
@@ -230,6 +256,7 @@ fun PropertyListScreen(
 @Composable
 private fun SwipeToDeletePropertyCard(
     property: Property,
+    exchangeRates: Map<String, Double>,
     onClick: () -> Unit,
     onDeleteRequested: () -> Unit
 ) {
@@ -251,7 +278,7 @@ private fun SwipeToDeletePropertyCard(
             PropertyDeleteBackground(dismissState.targetValue)
         }
     ) {
-        PropertyCard(property = property, onClick = onClick)
+        PropertyCard(property = property, exchangeRates = exchangeRates, onClick = onClick)
     }
 }
 
@@ -290,19 +317,31 @@ private fun PropertyDeleteBackground(targetValue: SwipeToDismissBoxValue) {
 }
 
 @Composable
-fun PropertyCard(property: Property, onClick: () -> Unit) {
+fun PropertyCard(property: Property, exchangeRates: Map<String, Double>, onClick: () -> Unit) {
     val context = LocalContext.current
     val currentCurrency by com.example.rentapp.data.preferences.PreferencesManager.getCurrencyFlow(context).collectAsState(initial = "USD")
+    
     val currencyFormatter = remember(currentCurrency) {
-        val locale = when (currentCurrency) {
-            "BOB" -> Locale("es", "BO")
-            "MXN" -> Locale("es", "MX")
-            else -> Locale("en", "US")
-        }
-        NumberFormat.getCurrencyInstance(locale).apply {
-            try {
-                this.currency = java.util.Currency.getInstance(currentCurrency)
-            } catch (e: Exception) {}
+        when (currentCurrency) {
+            "BOB" -> {
+                try {
+                    NumberFormat.getCurrencyInstance(Locale("es", "BO")).apply {
+                        currency = java.util.Currency.getInstance("BOB")
+                    }
+                } catch (e: Exception) {
+                    NumberFormat.getCurrencyInstance(Locale("es", "BO"))
+                }
+            }
+            "MXN" -> {
+                try {
+                    NumberFormat.getCurrencyInstance(Locale("es", "MX")).apply {
+                        currency = java.util.Currency.getInstance("MXN")
+                    }
+                } catch (e: Exception) {
+                    NumberFormat.getCurrencyInstance(Locale("es", "MX"))
+                }
+            }
+            else -> NumberFormat.getCurrencyInstance(Locale("en", "US"))
         }
     }
 
@@ -330,7 +369,7 @@ fun PropertyCard(property: Property, onClick: () -> Unit) {
                             .data(property.imageUrl)
                             .crossfade(true)
                             .build(),
-                        contentDescription = "Property Photo",
+                        contentDescription = stringResource(R.string.property_photo_desc),
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(180.dp),
@@ -396,7 +435,13 @@ fun PropertyCard(property: Property, onClick: () -> Unit) {
                         }
                     }
                     Text(
-                        currencyFormatter.format(property.monthlyRent),
+                        currencyFormatter.format(
+                            when(currentCurrency) {
+                                "BOB" -> property.monthlyRent * (exchangeRates["BOB"] ?: 6.96)
+                                "MXN" -> property.monthlyRent * (exchangeRates["MXN"] ?: 17.0)
+                                else -> property.monthlyRent
+                            }
+                        ),
                         style = MaterialTheme.typography.headlineSmall,
                         color = Primary,
                         fontWeight = FontWeight.Black
@@ -409,9 +454,9 @@ fun PropertyCard(property: Property, onClick: () -> Unit) {
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceAround
                 ) {
-                    PropertyStat(icon = Icons.Default.Bed, value = "${property.rooms}", label = "Beds")
-                    PropertyStat(icon = Icons.Default.Shower, value = "${property.bathrooms}", label = "Baths")
-                    PropertyStat(icon = Icons.Default.SquareFoot, value = "${property.area.toInt()} m²", label = "Area")
+                    PropertyStat(icon = Icons.Default.Bed, value = "${property.rooms}", label = stringResource(R.string.beds))
+                    PropertyStat(icon = Icons.Default.Shower, value = "${property.bathrooms}", label = stringResource(R.string.baths))
+                    PropertyStat(icon = Icons.Default.SquareFoot, value = "${property.area.toInt()} m²", label = stringResource(R.string.area_label))
                 }
 
                 Spacer(Modifier.height(16.dp))
@@ -464,28 +509,3 @@ private fun PropertyStat(icon: androidx.compose.ui.graphics.vector.ImageVector, 
     }
 }
 
-@Composable
-fun EmptyState(message: String, icon: androidx.compose.ui.graphics.vector.ImageVector) {
-    Column(
-        modifier = Modifier.fillMaxSize().padding(32.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
-    ) {
-        Box(
-            modifier = Modifier
-                .size(120.dp)
-                .background(Primary.copy(alpha = 0.05f), RoundedCornerShape(60.dp)),
-            contentAlignment = Alignment.Center
-        ) {
-            Icon(icon, contentDescription = null, tint = Primary.copy(alpha = 0.4f), modifier = Modifier.size(64.dp))
-        }
-        Spacer(Modifier.height(24.dp))
-        Text(
-            message,
-            style = MaterialTheme.typography.titleMedium,
-            color = OnSurfaceVariant,
-            textAlign = TextAlign.Center,
-            lineHeight = 24.sp
-        )
-    }
-}

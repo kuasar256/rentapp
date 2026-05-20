@@ -14,6 +14,7 @@ data class User(
     val rfc: String = "",
     val address: String = "",
     val avatarUrl: String = "",
+    @Deprecated("The app is now landlord-only. This field is kept for schema compatibility but defaults to 'Landlord'.")
     val userType: String = "Landlord", // "Landlord" or "Tenant"
     val createdAt: Long = System.currentTimeMillis(),
     val updatedAt: Long = System.currentTimeMillis(),

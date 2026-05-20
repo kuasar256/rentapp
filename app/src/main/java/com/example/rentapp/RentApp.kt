@@ -10,5 +10,8 @@ class RentApp : Application() {
         Log.d("RentAppDebug", "RentApp.onCreate called")
         // Crear canales de notificación al iniciar la app
         NotificationHelper.createChannels(this)
+        
+        // Programar recordatorios de pagos diarios
+        com.example.rentapp.worker.ReminderManager.scheduleDailyReminder(this)
     }
 }

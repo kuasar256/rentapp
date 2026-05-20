@@ -10,8 +10,16 @@ class PaymentRepository(
     private val syncManager: FirestoreSyncManager? = null
 ) {
     fun getAllPayments(): Flow<List<Payment>> = paymentDao.getAllPayments()
+    
     fun getPaymentsByContract(contractId: Long): Flow<List<Payment>> = paymentDao.getPaymentsByContract(contractId)
-    fun getPaymentsByStatus(status: String): Flow<List<Payment>> = paymentDao.getPaymentsByStatus(status)
+    
+    fun getPaymentsByStatus(status: String): Flow<List<Payment>> {
+        return if (status == "ALL") {
+            paymentDao.getAllPayments()
+        } else {
+            paymentDao.getPaymentsByStatus(status)
+        }
+    }
     fun getPendingAndDelayedPayments(): Flow<List<Payment>> = paymentDao.getPendingAndDelayedPayments()
     fun getPaymentsByYear(year: Int): Flow<List<Payment>> = paymentDao.getPaymentsByYear(year)
     fun getPaymentsByYearMonth(year: Int, month: Int): Flow<List<Payment>> = paymentDao.getPaymentsByYearMonth(year, month)

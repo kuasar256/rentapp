@@ -28,7 +28,8 @@ import kotlinx.coroutines.flow.first
 fun SplashScreen(
     onNavigateToLogin: () -> Unit,
     onNavigateToDashboard: () -> Unit,
-    onNavigateToBiometric: () -> Unit
+    onNavigateToBiometric: () -> Unit,
+    onNavigateToOnboarding: () -> Unit
 ) {
     val context = LocalContext.current
     val scale = remember { Animatable(0f) }
@@ -47,8 +48,12 @@ fun SplashScreen(
         if (currentUser == null) {
             onNavigateToLogin()
         } else {
+            val onboardingCompleted = PreferencesManager.getOnboardingCompletedFlow(context).first()
             val biometricEnabled = PreferencesManager.getBiometricEnabledFlow(context).first()
-            if (biometricEnabled) {
+            
+            if (!onboardingCompleted) {
+                onNavigateToOnboarding()
+            } else if (biometricEnabled) {
                 onNavigateToBiometric()
             } else {
                 onNavigateToDashboard()

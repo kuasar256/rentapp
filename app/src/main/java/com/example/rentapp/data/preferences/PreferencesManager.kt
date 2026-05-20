@@ -17,6 +17,7 @@ object PreferencesManager {
     private val BIOMETRIC_ENABLED    = booleanPreferencesKey("biometric_enabled")
     private val LAST_AUTH_TIMESTAMP  = longPreferencesKey("last_auth_timestamp")
     private val DARK_MODE_ENABLED    = booleanPreferencesKey("dark_mode_enabled")
+    private val ONBOARDING_COMPLETED = booleanPreferencesKey("onboarding_completed")
 
     // ── Tema Oscuro ──────────────────────────────────────────────────────────
     fun getDarkModeFlow(context: Context): Flow<Boolean> =
@@ -24,6 +25,14 @@ object PreferencesManager {
 
     suspend fun setDarkMode(context: Context, enabled: Boolean) {
         context.dataStore.edit { it[DARK_MODE_ENABLED] = enabled }
+    }
+
+    // ── Onboarding ──────────────────────────────────────────────────────────
+    fun getOnboardingCompletedFlow(context: Context): Flow<Boolean> =
+        context.dataStore.data.map { it[ONBOARDING_COMPLETED] ?: false }
+
+    suspend fun setOnboardingCompleted(context: Context, completed: Boolean) {
+        context.dataStore.edit { it[ONBOARDING_COMPLETED] = completed }
     }
 
     // ── Idioma ───────────────────────────────────────────────────────────────

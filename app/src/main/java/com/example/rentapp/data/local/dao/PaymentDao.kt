@@ -32,6 +32,9 @@ interface PaymentDao {
     @Query("SELECT * FROM payments WHERE year = :year AND month = :month")
     fun getPaymentsByYearMonth(year: Int, month: Int): Flow<List<Payment>>
 
+    @Query("SELECT * FROM payments WHERE year = :year AND month = :month")
+    suspend fun getAllPaymentsByYearMonthSync(year: Int, month: Int): List<Payment>
+
     @Query("SELECT IFNULL(SUM(amount), 0.0) FROM payments WHERE status = 'PAID' AND year = :year")
     fun getTotalCollectedByYear(year: Int): Flow<Double>
 

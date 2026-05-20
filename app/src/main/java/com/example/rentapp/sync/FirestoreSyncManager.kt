@@ -19,6 +19,7 @@ class FirestoreSyncManager(private val context: Context) {
     private val tenantDao = db.tenantDao()
     private val contractDao = db.contractDao()
     private val paymentDao = db.paymentDao()
+    private val expenseDao = db.expenseDao()
     private val userDao = db.userDao()
 
     private val scope = CoroutineScope(Dispatchers.IO)
@@ -124,6 +125,29 @@ class FirestoreSyncManager(private val context: Context) {
                 }
             }
         }
+
+        // Escuchar Gastos (Expenses)
+        userDoc.collection("expenses").addSnapshotListener { snapshots, e ->
+            if (e != null) {
+                Log.e("SyncManager", "Error en listener de gastos: ${e.message}")
+                return@addSnapshotListener
+            }
+            scope.launch {
+                try {
+                    snapshots?.forEach { doc ->
+                        val remote = doc.toObject(Expense::class.java)
+                        val local = expenseDao.getExpenseByRemoteId(doc.id)
+                        if (local == null) {
+                            expenseDao.insertExpense(remote.copy(remoteId = doc.id))
+                        } else if (remote.updatedAt > (local.updatedAt)) {
+                            expenseDao.updateExpense(remote.copy(id = local.id, remoteId = doc.id))
+                        }
+                    }
+                } catch (ex: Exception) {
+                    Log.e("SyncManager", "Error procesando gastos: ${ex.message}")
+                }
+            }
+        }
     }
 
     /**
@@ -164,6 +188,14 @@ class FirestoreSyncManager(private val context: Context) {
                 val syncedItem = item.copy(remoteId = docRef.id, updatedAt = System.currentTimeMillis())
                 docRef.set(syncedItem).await()
                 paymentDao.updatePayment(syncedItem)
+            }
+
+            // Sincronizar Gastos
+            expenseDao.getUnsyncedExpenses().forEach { item ->
+                val docRef = userDoc.collection("expenses").document()
+                val syncedItem = item.copy(remoteId = docRef.id, updatedAt = System.currentTimeMillis())
+                docRef.set(syncedItem).await()
+                expenseDao.updateExpense(syncedItem)
             }
 
             Log.d("SyncManager", "Sincronización inicial completada")
@@ -256,6 +288,31 @@ class FirestoreSyncManager(private val context: Context) {
             paymentDao.updatePayment(updated)
         } catch (e: Exception) {
             Log.e("SyncManager", "Error al subir pago: ${e.message}")
+        }
+    }
+
+    suspend fun pushExpense(expense: Expense) {
+        try {
+            val uid = auth.currentUser?.uid ?: return
+            val docId = expense.remoteId ?: firestore.collection("users").document(uid).collection("expenses").document().id
+            val updated = expense.copy(remoteId = docId, updatedAt = System.currentTimeMillis())
+            firestore.collection("users").document(uid).collection("expenses").document(docId).set(updated).await()
+            expenseDao.updateExpense(updated)
+        } catch (e: Exception) {
+            Log.e("SyncManager", "Error al subir gasto: ${e.message}")
+        }
+    }
+
+    suspend fun deleteExpense(expense: Expense) {
+        try {
+            val uid = auth.currentUser?.uid ?: return
+            val remoteId = expense.remoteId ?: return
+            firestore.collection("users").document(uid)
+                .collection("expenses").document(remoteId)
+                .delete().await()
+            Log.d("SyncManager", "Gasto eliminado de Firestore: $remoteId")
+        } catch (e: Exception) {
+            Log.e("SyncManager", "Error al eliminar gasto de Firestore: ${e.message}")
         }
     }
 }

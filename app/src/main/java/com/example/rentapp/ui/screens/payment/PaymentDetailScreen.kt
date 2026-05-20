@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -31,11 +32,13 @@ import java.util.Locale
 fun PaymentDetailScreen(
     paymentId: Long,
     viewModel: PaymentViewModel,
+    userViewModel: com.example.rentapp.viewmodel.UserViewModel,
     contractRepo: ContractRepository,
     propertyRepo: PropertyRepository,
     tenantRepo: TenantRepository,
     onBack: () -> Unit
 ) {
+    val currentUser by userViewModel.user.collectAsState()
     val allPayments by viewModel.allPayments.collectAsState()
     val payment = allPayments.find { it.id == paymentId }
     val contract by contractRepo.getAllContracts().collectAsState(emptyList())
@@ -67,7 +70,46 @@ fun PaymentDetailScreen(
                 title = { Text("Detalle de Pago", color = OnBackground, fontWeight = FontWeight.Bold) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Regresar", tint = Primary)
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Regresar", tint = Primary)
+                    }
+                },
+                actions = {
+                    if (payment?.status == "PAID") {
+                        IconButton(onClick = {
+                            payment.let { p ->
+                                val fileName = com.example.rentapp.util.PdfHelper.generatePaymentReceipt(
+                                    context = context,
+                                    payment = p,
+                                    contract = currentContract,
+                                    property = property,
+                                    tenant = tenant,
+                                    landlordName = currentUser?.name ?: "Arrendador",
+                                    currency = currentCurrency
+                                )
+                                com.example.rentapp.util.ShareHelper.sharePdf(
+                                    context = context,
+                                    fileName = fileName,
+                                    title = "Recibo de Alquiler - ${p.month}/${p.year}"
+                                )
+                            }
+                        }) {
+                            Icon(Icons.Default.Share, contentDescription = "Compartir Recibo", tint = Primary)
+                        }
+                        IconButton(onClick = {
+                            payment.let { p ->
+                                com.example.rentapp.util.PdfHelper.generatePaymentReceipt(
+                                    context = context,
+                                    payment = p,
+                                    contract = currentContract,
+                                    property = property,
+                                    tenant = tenant,
+                                    landlordName = currentUser?.name ?: "Arrendador",
+                                    currency = currentCurrency
+                                )
+                            }
+                        }) {
+                            Icon(Icons.Default.PictureAsPdf, contentDescription = "Exportar PDF", tint = Primary)
+                        }
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(containerColor = Background)

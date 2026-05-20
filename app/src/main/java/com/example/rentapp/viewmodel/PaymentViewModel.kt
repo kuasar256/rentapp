@@ -3,32 +3,35 @@ package com.example.rentapp.viewmodel
 import androidx.lifecycle.*
 import com.example.rentapp.data.local.entity.Payment
 import com.example.rentapp.data.repository.PaymentRepository
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import java.util.Calendar
 
+@OptIn(ExperimentalCoroutinesApi::class)
 class PaymentViewModel(private val repository: PaymentRepository) : ViewModel() {
 
     val allPayments = repository.getAllPayments()
-        .stateIn(viewModelScope, SharingStarted.Lazily, emptyList())
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
     val pendingPayments = repository.getPaymentsByStatus("PENDING")
-        .stateIn(viewModelScope, SharingStarted.Lazily, emptyList())
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
     val delayedPayments = repository.getDelayedPayments()
-        .stateIn(viewModelScope, SharingStarted.Lazily, emptyList())
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
     val paidPayments = repository.getPaymentsByStatus("PAID")
-        .stateIn(viewModelScope, SharingStarted.Lazily, emptyList())
+        .onEach { println("DEBUG: Pagos finalizados encontrados: ${it.size}") }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
     val pendingAndDelayed = repository.getPendingAndDelayedPayments()
-        .stateIn(viewModelScope, SharingStarted.Lazily, emptyList())
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
     val delayedCount = repository.getDelayedCount()
-        .stateIn(viewModelScope, SharingStarted.Lazily, 0)
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 0)
 
     val pendingCount = repository.getPendingCount()
-        .stateIn(viewModelScope, SharingStarted.Lazily, 0)
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 0)
 
     private val _selectedYear = MutableStateFlow(Calendar.getInstance().get(Calendar.YEAR))
     val selectedYear: StateFlow<Int> = _selectedYear

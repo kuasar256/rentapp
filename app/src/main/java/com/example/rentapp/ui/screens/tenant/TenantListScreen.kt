@@ -26,7 +26,7 @@ import androidx.compose.ui.unit.*
 import androidx.navigation.NavHostController
 import com.example.rentapp.R
 import com.example.rentapp.data.local.entity.Tenant
-import com.example.rentapp.ui.screens.property.EmptyState
+import com.example.rentapp.ui.components.EmptyState
 import com.example.rentapp.ui.screens.auth.NeonTextField
 import com.example.rentapp.ui.theme.*
 import com.example.rentapp.ui.components.RentAppBottomBar
@@ -81,13 +81,26 @@ fun TenantListScreen(
                         Icon(Icons.Default.ArrowBack, contentDescription = stringResource(R.string.cancel), tint = Primary)
                     }
                 },
-                actions = {
-                    IconButton(onClick = onAddClick) {
-                        Icon(Icons.Default.Add, contentDescription = stringResource(R.string.add_tenant), tint = Primary)
-                    }
-                },
                 colors = TopAppBarDefaults.topAppBarColors(containerColor = Background)
             )
+        },
+        floatingActionButton = {
+            FloatingActionButton(
+                onClick = onAddClick,
+                containerColor = Primary,
+                contentColor = Background,
+                shape = RoundedCornerShape(16.dp),
+                elevation = FloatingActionButtonDefaults.elevation(8.dp)
+            ) {
+                Row(
+                    modifier = Modifier.padding(horizontal = 16.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Icon(Icons.Default.PersonAdd, contentDescription = null)
+                    Spacer(Modifier.width(8.dp))
+                    Text(stringResource(R.string.add), fontWeight = FontWeight.Black)
+                }
+            }
         },
         bottomBar = {
             RentAppBottomBar(navController = navController)
@@ -110,7 +123,7 @@ fun TenantListScreen(
                     modifier = Modifier.weight(1f)
                 )
                 StatCard(
-                    label = "TOTAL", 
+                    label = stringResource(R.string.total_label),
                     value = "${tenants.size}", 
                     icon = Icons.Default.Groups, 
                     color = Tertiary,
@@ -189,9 +202,19 @@ fun TenantListScreen(
             }
 
             if (tenants.isEmpty()) {
+                val (emptyTitle, emptyDesc, emptyIcon) = when (statusFilter) {
+                    "ACTIVE" -> Triple(stringResource(R.string.empty_tenants_active_title), stringResource(R.string.empty_tenants_active_desc), Icons.Default.PersonOff)
+                    "DELAYED" -> Triple(stringResource(R.string.empty_tenants_delayed_title), stringResource(R.string.empty_tenants_delayed_desc), Icons.Default.SentimentVerySatisfied)
+                    "PAID" -> Triple(stringResource(R.string.empty_tenants_paid_title), stringResource(R.string.empty_tenants_paid_desc), Icons.Default.Payments)
+                    else -> Triple(stringResource(R.string.empty_tenants_title), stringResource(R.string.empty_tenants_desc), Icons.Default.PeopleOutline)
+                }
+
                 EmptyState(
-                    message = stringResource(R.string.no_tenants_msg),
-                    icon = Icons.Default.PeopleOutline
+                    message = emptyTitle,
+                    description = emptyDesc,
+                    icon = emptyIcon,
+                    actionLabel = if (statusFilter == "ALL") stringResource(R.string.add_tenant) else null,
+                    onActionClick = onAddClick
                 )
             } else {
                 LazyColumn(
@@ -374,7 +397,7 @@ fun TenantCard(displayModel: com.example.rentapp.viewmodel.TenantDisplayModel, o
         "PAID" -> stringResource(R.string.status_paid)
         "DELAYED" -> stringResource(R.string.status_delayed)
         "PENDING" -> stringResource(R.string.status_pending)
-        else -> "N/A"
+        else -> stringResource(R.string.not_available_short)
     }
     
     Card(

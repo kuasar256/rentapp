@@ -9,11 +9,16 @@
     <string name="email">Correo Electrónico</string>
     <string name="password">Contraseña</string>
     <string name="error_fill_all_fields">Por favor completa todos los campos</string>
+    <string name="error_field_required">Este campo es obligatorio</string>
     <string name="login_btn">Iniciar Sesión</string>
     <string name="no_account">¿No tienes cuenta? </string>
     <string name="register">Regístrate</string>
     <string name="user_profile">Perfil de Usuario</string>
+    <string name="profile">Perfil</string>
+    <string name="alerts">Alertas</string>
     <string name="logout">Cerrar Sesión</string>
+    <string name="home">Inicio</string>
+    <string name="reports">Reportes</string>
     <string name="properties">Propiedades</string>
     <string name="tenants">Inquilinos</string>
     <string name="payments">Pagos</string>
@@ -34,6 +39,9 @@
     <string name="dashboard_view_reports">Ver\nReportes</string>
     <string name="dashboard_delinquency_alerts">Alertas de Morosidad</string>
     <string name="dashboard_overdue_payments_warning">%1$d pagos con retraso requieren atención</string>
+    <string name="good_morning">¡Buenos días</string>
+    <string name="good_afternoon">¡Buenas tardes</string>
+    <string name="good_evening">¡Buenas noches</string>
 
     <!-- Annual Report -->
     <string name="annual_report_title">Reporte Anual</string>
@@ -90,7 +98,8 @@
     <string name="tap_to_add_photo">Toca para agregar foto</string>
     <string name="save_changes">Guardar Cambios</string>
     <string name="add_property_btn">Agregar Propiedad</string>
-    
+    <string name="add">Agregar</string>
+
     <!-- Property Status -->
     <string name="status_available">Disponible</string>
     <string name="status_rented">Rentada</string>
@@ -212,4 +221,117 @@
     <string name="notification_property_rented_title">¡Propiedad Rentada!</string>
     <string name="notification_property_rented_body">La propiedad \"%1$s\" ha sido rentada exitosamente a %2$s.</string>
     <string name="fraud_prevention_notice">Recuerde: Para su seguridad, toda comunicación y registro de pagos debe realizarse exclusivamente a través de esta plataforma.</string>
+
+    <!-- Onboarding -->
+    <string name="onboarding_skip">Saltar</string>
+    <string name="onboarding_next">Siguiente</string>
+    <string name="onboarding_start">Empezar</string>
+    <string name="onboarding_welcome_title">Bienvenido a RentApp</string>
+    <string name="onboarding_welcome_desc">La herramienta definitiva para propietarios que buscan profesionalizar la gestión de sus rentas.</string>
+    <string name="onboarding_mgmt_title">Gestión Simplificada</string>
+    <string name="onboarding_mgmt_desc">Administra propiedades, inquilinos y contratos en un solo lugar. Todo bajo control.</string>
+    <string name="onboarding_analytics_title">Analítica Avanzada</string>
+    <string name="onboarding_analytics_desc">Visualiza tus ingresos anuales con gráficos interactivos y genera reportes PDF profesionales.</string>
+    <string name="onboarding_automation_title">Automatización Total</string>
+    <string name="onboarding_automation_desc">Recordatorios automáticos de pagos pendientes y sincronización en la nube para tu tranquilidad.</string>
+    <string name="finalize">Finalizar</string>
+    <string name="finalize_contract">Finalizar Contrato</string>
+    <string name="finalize_contract_confirm">¿Estás seguro de que deseas finalizar este contrato? La propiedad volverá a estar disponible.</string>
+    <string name="property_rules">REGLAS DE LA PROPIEDAD</string>
+    <string name="budget_manager">Gestión de Presupuestos</string>
+    <string name="add_budget">Nuevo Presupuesto</string>
+    <string name="repair_description">Descripción de Reparación</string>
+    <string name="estimated_cost">Costo Estimado</string>
+    <string name="actual_cost">Costo Real</string>
+    <string name="repair_status">Estado de Reparación</string>
+    <string name="provider">Proveedor</string>
+    <string name="save_budget">Guardar Presupuesto</string>
+    <string name="status_approved">Aprobado</string>
+    <string name="status_in_progress">En Progreso</string>
+    <string name="status_completed">Completado</string>
+    <string name="edit_budget">Editar Presupuesto</string>
+    <string name="select_property">Seleccionar Propiedad</string>
+    <!-- Property List & Stats -->
+    <string name="empty_properties_available_title">No hay propiedades disponibles</string>
+    <string name="empty_properties_available_desc">Todas tus propiedades están ocupadas o en mantenimiento.</string>
+    <string name="empty_properties_rented_title">No hay propiedades rentadas</string>
+    <string name="empty_properties_rented_desc">Parece que aún no tienes inquilinos activos.</string>
+    <string name="empty_properties_maintenance_title">Todo está en orden</string>
+    <string name="empty_properties_maintenance_desc">No tienes propiedades en mantenimiento actualmente.</string>
+    <string name="empty_properties_general_desc">Comienza agregando tu primera propiedad para gestionar tus alquileres.</string>
+    <string name="beds">Recámaras</string>
+    <string name="baths">Baños</string>
+    <string name="area_label">Área</string>
+    <string name="property_photo_desc">Foto de la propiedad</string>
+
+    <string name="total_label">TOTAL</string>
+    <string name="empty_tenants_active_title">No hay inquilinos activos</string>
+    <string name="empty_tenants_active_desc">No tienes contratos vigentes en este momento.</string>
+    <string name="empty_tenants_delayed_title">¡Excelentes noticias!</string>
+    <string name="empty_tenants_delayed_desc">No tienes inquilinos con pagos atrasados.</string>
+    <string name="empty_tenants_paid_title">Sin pagos recientes</string>
+    <string name="empty_tenants_paid_desc">Aún no se han registrado pagos para este filtro.</string>
+    <string name="empty_tenants_general_desc">Agrega a las personas que alquilan tus propiedades para llevar un control.</string>
+    <string name="not_available_short">N/A</string>
+
+    <string name="payment_modality">Modalidad de Pago</string>
+    <string name="contract_type">Tipo de Contrato</string>
+    <string name="cash">Efectivo</string>
+    <string name="anticretico">Anticrético</string>
+    <string name="property_rules_label">Reglas del Inmueble</string>
+    <string name="property_rules_hint">Ej: No mascotas, no fiestas...</string>
+    <string name="user_data">Datos de Usuario</string>
+    <string name="full_name">Nombre Completo</string>
+    <string name="phone">Teléfono</string>
+    <string name="company">Empresa</string>
+    <string name="interface_config">Configuración de Interfaz</string>
+    <string name="language">Idioma</string>
+    <string name="security">Seguridad</string>
+    <string name="biometric_lock">Bloqueo Biométrico</string>
+    <string name="biometric_lock_desc">Proteger inicio de la aplicación</string>
+    <string name="base_currency">Moneda Base</string>
+    <string name="base_currency_desc">Elija la moneda principal de operaciones. Los precios se convertirán y mostrarán de acuerdo a esto.</string>
+    <string name="currency">Moneda</string>
+    <string name="changes_saved_local">Cambios guardados localmente</string>
+    <string name="revenue_decay_title">Impacto de Reparaciones</string>
+    <string name="revenue_decay_desc">Visualización de ingresos vs presupuestos de reparación</string>
+    <string name="planned_expenses">Gastos Proyectados</string>
+    <string name="remaining_revenue">Ingresos Restantes</string>
+    <string name="no_repairs_planned">Sin reparaciones planeadas para este año.</string>
+
+    <!-- Expenses -->
+    <string name="expenses_title">Gastos</string>
+    <string name="add_expense">Agregar Gasto</string>
+    <string name="edit_expense">Editar Gasto</string>
+    <string name="expense_category">Categoría de Gasto</string>
+    <string name="expense_amount">Monto del Gasto</string>
+    <string name="expense_description">Descripción del Gasto</string>
+    <string name="expense_date">Fecha del Gasto</string>
+    <string name="category_maintenance">Mantenimiento</string>
+    <string name="category_taxes">Impuestos</string>
+    <string name="category_services">Servicios</string>
+    <string name="category_insurance">Seguro</string>
+    <string name="category_others">Otros</string>
+    <string name="net_income">Ingreso Neto</string>
+    <string name="empty_properties_title">No hay propiedades</string>
+    <string name="empty_properties_desc">Agrega tu primer inmueble para empezar a gestionar tus rentas.</string>
+    <string name="empty_tenants_title">Sin inquilinos</string>
+    <string name="empty_tenants_desc">Registra a las personas que ocupan tus propiedades.</string>
+    <string name="empty_payments_title">Sin pagos registrados</string>
+    <string name="empty_payments_desc">Aquí aparecerá el historial de cobros realizados.</string>
+    <string name="empty_expenses_title">No hay gastos</string>
+    <string name="empty_expenses_desc">Registra tus gastos para tener un balance financiero real.</string>
+
+    <!-- Property Condition (Check-in/Check-out) -->
+    <string name="check_in">Check-in</string>
+    <string name="check_out">Check-out</string>
+    <string name="property_condition">Estado de la Propiedad</string>
+    <string name="add_condition_report">Agregar Reporte de Estado</string>
+    <string name="condition_type">Tipo de Inspección</string>
+    <string name="condition_photos">Fotos del Estado</string>
+    <string name="condition_notes">Notas de la Inspección</string>
+    <string name="no_conditions_msg">No hay reportes de estado registrados.</string>
+    <string name="save_condition_report">Guardar Reporte</string>
+    <string name="inspection_date">Fecha de Inspección</string>
+    <string name="view_photos">Ver Fotos (%1$d)</string>
 </resources>

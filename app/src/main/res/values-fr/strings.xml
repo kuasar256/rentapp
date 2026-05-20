@@ -10,6 +10,7 @@
     <string name="email">E-mail</string>
     <string name="password">Mot de passe</string>
     <string name="error_fill_all_fields">Veuillez remplir tous les champs</string>
+    <string name="error_field_required">Ce champ est obligatoire</string>
     <string name="login_btn">Se connecter</string>
     <string name="no_account">Pas encore de compte ? </string>
     <string name="register">S\'inscrire</string>
@@ -64,4 +65,49 @@
     <string name="delinquency_days_overdue">%1$d jours de retard</string>
     <string name="delinquency_mark_paid">Marquer comme Payé</string>
     <string name="delinquency_total_debt">Dette Totale</string>
+    <string name="add">Ajouter</string>
+    <string name="add_property">Ajouter une Propriété</string>
+    <string name="add_tenant">Ajouter un Locataire</string>
+    <string name="all_filter">Tous</string>
+    <string name="available_filter">Disponibles</string>
+    <string name="rented_filter">Loués</string>
+    <string name="maintenance_filter">Maintenance</string>
+    <string name="active_filter">Actifs</string>
+    <string name="inactive_filter">Inactifs</string>
+    <string name="properties_list_title">Propriétés</string>
+    <string name="tenants_list_title">Locataires</string>
+    <string name="cancel">Annuler</string>
+    <string name="search_hint">Rechercher…</string>
+    <string name="status_paid">Payé</string>
+    <string name="status_pending">En attente</string>
+    <string name="status_delayed">En retard</string>
+    <!-- Property List & Stats -->
+    <string name="empty_properties_available_title">Aucune propriété disponible</string>
+    <string name="empty_properties_available_desc">Toutes vos propriétés sont occupées ou en maintenance.</string>
+    <string name="empty_properties_rented_title">Aucune propriété louée</string>
+    <string name="empty_properties_rented_desc">Il semble que vous n\'ayez pas encore de locataires actifs.</string>
+    <string name="empty_properties_maintenance_title">Tout est en ordre</string>
+    <string name="empty_properties_maintenance_desc">Vous n\'avez actuellement aucune propriété en maintenance.</string>
+    <string name="empty_properties_general_desc">Commencez par ajouter votre première propriété pour gérer vos locations.</string>
+    <string name="beds">Chambres</string>
+    <string name="baths">Bains</string>
+    <string name="area_label">Surface</string>
+    <string name="property_photo_desc">Photo de la propriété</string>
+
+    <string name="total_label">TOTAL</string>
+    <string name="empty_tenants_active_title">Aucun locataire actif</string>
+    <string name="empty_tenants_active_desc">Vous n\'avez pas de contrats en cours pour le moment.</string>
+    <string name="empty_tenants_delayed_title">Excellentes nouvelles !</string>
+    <string name="empty_tenants_delayed_desc">Vous n\'avez pas de locataires avec des retards de paiement.</string>
+    <string name="empty_tenants_paid_title">Aucun paiement récent</string>
+    <string name="empty_tenants_paid_desc">Aucun paiement n\'a encore été enregistré pour ce filtre.</string>
+    <string name="empty_tenants_general_desc">Ajoutez les personnes qui louent vos propriétés pour garder le contrôle.</string>
+    <string name="not_available_short">N/A</string>
+
+    <string name="payment_modality">Modalité de Paiement</string>
+    <string name="contract_type">Type de Contrat</string>
+    <string name="cash">Espèces</string>
+    <string name="anticretico">Antichrétique</string>
+    <string name="property_rules_label">Règles de l\'Immeuble</string>
+    <string name="property_rules_hint">Ex: Pas d\'animaux, pas de fêtes...</string>
 </resources>

@@ -8,8 +8,8 @@ import com.example.rentapp.data.local.dao.*
 import com.example.rentapp.data.local.entity.*
 
 @Database(
-    entities = [Property::class, Tenant::class, Contract::class, Payment::class, User::class],
-    version = 4,
+    entities = [Property::class, Tenant::class, Contract::class, Payment::class, User::class, RepairBudget::class, Expense::class, PropertyCondition::class],
+    version = 8,
     exportSchema = false
 )
 abstract class AppDatabase : RoomDatabase() {
@@ -18,6 +18,9 @@ abstract class AppDatabase : RoomDatabase() {
     abstract fun contractDao(): ContractDao
     abstract fun paymentDao(): PaymentDao
     abstract fun userDao(): UserDao
+    abstract fun repairBudgetDao(): RepairBudgetDao
+    abstract fun expenseDao(): ExpenseDao
+    abstract fun propertyConditionDao(): PropertyConditionDao
 
     companion object {
         @Volatile

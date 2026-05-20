@@ -24,6 +24,7 @@ import com.example.rentapp.ui.theme.*
 import com.example.rentapp.ui.components.RentAppBottomBar
 import com.example.rentapp.viewmodel.PaymentViewModel
 import java.text.NumberFormat
+import java.util.Calendar
 import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -135,10 +136,29 @@ fun PaymentHistoryScreen(
 
             if (yearPayments.isEmpty()) {
                 Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.padding(32.dp)) {
                         Icon(Icons.Default.History, contentDescription = null, tint = OnSurfaceVariant.copy(alpha = 0.3f), modifier = Modifier.size(64.dp))
                         Spacer(Modifier.height(16.dp))
-                        Text("Sin registros en $selectedYear", color = OnSurfaceVariant, style = MaterialTheme.typography.bodyMedium)
+                        Text("Sin registros en $selectedYear", color = OnSurfaceVariant, style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.Bold)
+                        Text("Prueba seleccionando otro año arriba o revisa la pestaña 'Finalizado' en la sección de pagos.", 
+                            color = OnSurfaceVariant.copy(alpha = 0.7f), 
+                            style = MaterialTheme.typography.bodyMedium,
+                            textAlign = androidx.compose.ui.text.style.TextAlign.Center)
+                        
+                        if (payments.isNotEmpty()) {
+                            Spacer(Modifier.height(24.dp))
+                            Button(
+                                onClick = { 
+                                    val yearWithData = payments.map { 
+                                        val cal = Calendar.getInstance(); cal.timeInMillis = it.dueDate; cal.get(Calendar.YEAR) 
+                                    }.firstOrNull()
+                                    if (yearWithData != null) viewModel.setSelectedYear(yearWithData)
+                                },
+                                colors = ButtonDefaults.buttonColors(containerColor = Secondary)
+                            ) {
+                                Text("Ver año con datos")
+                            }
+                        }
                     }
                 }
             } else {

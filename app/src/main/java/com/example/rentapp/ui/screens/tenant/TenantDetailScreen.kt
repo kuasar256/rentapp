@@ -32,6 +32,7 @@ import com.example.rentapp.data.local.entity.Contract
 import com.example.rentapp.data.local.entity.Tenant
 import com.example.rentapp.data.repository.ContractRepository
 import com.example.rentapp.ui.theme.*
+import com.example.rentapp.ui.components.DocumentGallery
 import com.example.rentapp.viewmodel.TenantViewModel
 import com.example.rentapp.viewmodel.UserViewModel
 import java.io.File
@@ -48,7 +49,8 @@ fun TenantDetailScreen(
     contractRepo: ContractRepository,
     onBack: () -> Unit,
     onEdit: () -> Unit,
-    onContractClick: (Long) -> Unit
+    onContractClick: (Long) -> Unit,
+    onViewPhotos: (List<String>, Int) -> Unit = { _, _ -> }
 ) {
     val context = LocalContext.current
     var contracts by remember { mutableStateOf<List<Contract>>(emptyList()) }
@@ -68,6 +70,8 @@ fun TenantDetailScreen(
     }
     val dateFormat = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
 
+    val currencyIcon = if (currentCurrency == "BOB") Icons.Default.Payments else Icons.Default.AttachMoney
+    
     val tenantDisplay by viewModel.getTenantDisplayFlow(tenantId).collectAsState(initial = null)
     val tenant = tenantDisplay?.tenant
     
@@ -133,7 +137,10 @@ fun TenantDetailScreen(
                                 modifier = Modifier
                                     .size(120.dp)
                                     .clip(CircleShape)
-                                    .border(2.dp, Primary, CircleShape),
+                                    .border(2.dp, Primary, CircleShape)
+                                    .clickable(enabled = t.photoUrl.isNotBlank()) {
+                                        onViewPhotos(listOf(t.photoUrl), 0)
+                                    },
                                 contentScale = ContentScale.Crop,
                                 error = androidx.compose.ui.graphics.painter.ColorPainter(SurfaceContainerHigh)
                             )
@@ -206,7 +213,7 @@ fun TenantDetailScreen(
                                 InfoRow(Icons.Default.Email, stringResource(R.string.email_label), t.email)
                                 InfoRow(Icons.Default.Phone, stringResource(R.string.phone_label), t.phone)
                                 InfoRow(Icons.Default.Work, stringResource(R.string.occupation_label), t.occupation)
-                                InfoRow(Icons.Default.AttachMoney, "Ingresos Mensuales", formatter.format(t.monthlyIncome)) // Hardcoded fallback if missing stringResource, replacing below
+                                InfoRow(currencyIcon, "Ingresos Mensuales", formatter.format(t.monthlyIncome))
                             }
                         }
                     }
@@ -225,6 +232,17 @@ fun TenantDetailScreen(
                             Column(Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
                                 InfoRow(Icons.Default.Badge, t.documentType, t.documentId)
                                 InfoRow(Icons.Default.Public, stringResource(R.string.nationality_label), t.nationality)
+                                
+                                val uris = t.documentImageUris.split(",").filter { it.isNotBlank() }
+                                if (uris.isNotEmpty()) {
+                                    Spacer(Modifier.height(8.dp))
+                                    Text("DOCUMENTOS ESCANEADOS", style = MaterialTheme.typography.labelSmall, color = Primary, fontWeight = FontWeight.Bold)
+                                    DocumentGallery(
+                                        uris = uris,
+                                        onAddClick = null, // View only
+                                        onImageClick = { index -> onViewPhotos(uris, index) }
+                                    )
+                                }
                             }
                         }
                     }

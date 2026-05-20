@@ -5,9 +5,9 @@ Este documento proporciona una visión detallada de la arquitectura, diseño y p
 ---
 
 ## 📖 Descripción No Técnica (Para Usuarios y Negocios)
-**RentApp** es una herramienta integral, innovadora y moderna diseñada para ayudar a los propietarios y gestores a administrar de manera fácil y rápida sus propiedades de alquiler directamente desde su teléfono móvil. 
+**RentApp** es una herramienta integral, innovadora y moderna diseñada exclusivamente para **arrendadores y propietarios**. Permite administrar de manera fácil y rápida propiedades de alquiler directamente desde un dispositivo móvil. 
 
-Con esta aplicación, los usuarios pueden registrar nuevas propiedades, ubicarlas de forma gráfica usando un mapa libre, gestionar los cobros y pagos de los inquilinos y visualizar eficaces reportes anuales de sus ganancias en tiempo real. Su característica más impresionante es que **permite trabajar sin conexión a internet** (Offline-First); todo lo que el usuario añade o modifica queda guardado en la memoria del teléfono y la app se encarga por su cuenta de actualizar y salvaguardar la información en la nube en el preciso momento en que detecta señal nuevamente. Además, RentApp acompaña al usuario en su propio idioma y mantiene la privacidad de sus finanzas bajo un estricto blindaje de seguridad biométrica (reconocimiento facial o huella digital).
+Con esta aplicación, los propietarios pueden registrar inmuebles, gestionar inquilinos, crear contratos digitales y emitir recibos de pago. Su característica más impresionante es que **permite trabajar sin conexión a internet** (Offline-First); además, permite generar documentos profesionales en formato PDF y Excel (CSV) para reportes anuales, contratos y comprobantes de pago. Todo esto bajo un estricto blindaje de seguridad biométrica.
 
 ---
 
@@ -22,15 +22,17 @@ A nivel de datos e infraestructura, el proyecto implementa un patrón robusto ti
 
 ## 🎯 Funcionalidades Principales de la App
 
+* **Enfoque Landlord-Only**: UX optimizada exclusivamente para las necesidades del arrendador, eliminando distracciones y simplificando la gestión de cobros.
+* **Generación de Documentos Digitales**: Creación instantánea de reportes anuales, contratos de alquiler y recibos de pago en formato PDF profesional, guardados directamente en la carpeta de descargas.
+* **Exportación Analítica**: Capacidad de exportar datos financieros a formatos CSV (Excel) para un control contable externo detallado.
 * **Autenticación Moderna Integral**: Inicio de sesión ágil con Google Sign-In mediante la nueva API Android Credential Manager y Firebase Auth.
-* **Seguridad Biométrica Inteligente**: Control de acceso y cierre de sesión seguro requiriendo lectura de huella dactilar o reconocimiento facial de la API Jetpack Biometrics, con configuraciones del usuario almacenadas en DataStore Preferences.
-* **Gestión de Propiedades Eficiente**: Capacidad para agregar, listar, visualizar detalles y editar unidades de bienes raíces a comercializar.
-* **Geolocalización en Mapas Libre**: Incorporación de un visor de mapa dinámico dentro de la creación/visualización de propiedades que permite al usuario marcar su dirección (sin usar API keys cerradas de Google).
-* **Administración Financiera de Pagos rentables**: Registro de pagos, seguimiento de montos y uso del consumo de APIs REST vía la red para conversiones de divisas automáticas y manejo de países (*REST Countries* y *ExchangeRate*).
-* **Módulo de Reportes Anuales**: Pantallas para analizar y visualizar rendimientos financieros por periodos con métricas fiables.
-* **Mecanismos Offline Resilientes**: Trabajo ininterrumpido sin internet, donde se insertan propiedades y pagos en el caché local a ser insertados a Google Cloud silenciados para sincronizaciones en back-ground.
-* **Notificaciones Push Contextuales:** Envío y gestión de estado mediante Firebase Cloud Messaging para alertas globales del sistema al usuario.
-* **Multi-idioma (i18n)**: La interfaz responde de manera automática reaccionando al entorno entre variables localizadas como Español e Inglés nativo.
+* **Seguridad Biométrica Inteligente**: Control de acceso seguro requiriendo lectura de huella dactilar o reconocimiento facial.
+* **Gestión de Propiedades Eficiente**: Capacidad para agregar, listar y editar unidades de bienes raíces con seguimiento de estado (Disponible/Rentada).
+* **Geolocalización en Mapas Libre**: Incorporación de un visor de mapa dinámico basado en OSmdroid para ubicar propiedades con precisión.
+* **Administración Financiera y Auditoría**: Seguimiento de pagos mensuales con recordatorios automáticos gestionados por WorkManager para alertar sobre morosidad o próximos vencimientos.
+* **Módulo de Reportes Visuales**: Gráficos dinámicos y estadísticas de rendimiento financiero anual para una toma de decisiones informada.
+* **Mecanismos Offline Resilientes**: Trabajo ininterrumpido sin internet con sincronización bidireccional automática hacia la nube.
+* **Multi-idioma (i18n)**: Soporte completo para Español, Inglés, Portugués, Francés y Alemán.
 
 ---
 

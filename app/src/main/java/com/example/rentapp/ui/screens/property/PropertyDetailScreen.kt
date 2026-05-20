@@ -8,9 +8,11 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import kotlinx.coroutines.launch
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -50,10 +52,16 @@ fun PropertyDetailScreen(
     onAddContractClick: () -> Unit,
     onContractClick: (Long) -> Unit,
     onAddPaymentClick: (Long) -> Unit,
-    onPaymentClick: (Long) -> Unit
+    onPaymentClick: (Long) -> Unit,
+    onBudgetClick: (Long) -> Unit = {},
+    onAddExpenseClick: (Long) -> Unit = {},
+    onAddConditionClick: (Long, Long?, String) -> Unit = { _, _, _ -> },
+    onViewPhotos: (List<String>, Int) -> Unit = { _, _ -> }
 ) {
     val context = LocalContext.current
     val currentCurrency by com.example.rentapp.data.preferences.PreferencesManager.getCurrencyFlow(context).collectAsState(initial = "USD")
+    val currencyIcon = if (currentCurrency == "BOB") Icons.Default.Payments else Icons.Default.AttachMoney
+
     val formatter = remember(currentCurrency) {
         val locale = when (currentCurrency) {
             "BOB" -> Locale("es", "BO")
@@ -68,6 +76,8 @@ fun PropertyDetailScreen(
     }
     val dateFormat = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
     var showDeleteDialog by remember { mutableStateOf(false) }
+    var contractToFinalize by remember { mutableStateOf<Contract?>(null) }
+    val scope = rememberCoroutineScope()
     
     // Get the property from the ViewModel
     val properties by viewModel.allProperties.collectAsState(initial = emptyList())
@@ -98,13 +108,41 @@ fun PropertyDetailScreen(
         )
     }
 
+    if (contractToFinalize != null) {
+        AlertDialog(
+            onDismissRequest = { contractToFinalize = null },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        val contract = contractToFinalize!!
+                        scope.launch {
+                            contractRepo.updateContract(contract.copy(status = "TERMINATED"))
+                            viewModel.updatePropertyStatus(propertyId, "AVAILABLE")
+                            contractToFinalize = null
+                        }
+                    },
+                    colors = ButtonDefaults.buttonColors(containerColor = Error)
+                ) { Text(stringResource(R.string.finalize), color = Color.White) }
+            },
+            dismissButton = {
+                TextButton(onClick = { contractToFinalize = null }) {
+                    Text(stringResource(R.string.cancel), color = Primary)
+                }
+            },
+            title = { Text(stringResource(R.string.finalize_contract), color = OnBackground, fontWeight = FontWeight.Bold) },
+            text = { Text(stringResource(R.string.finalize_contract_confirm), color = OnSurfaceVariant) },
+            containerColor = SurfaceContainerHigh,
+            shape = RoundedCornerShape(20.dp)
+        )
+    }
+
     Scaffold(
         topBar = {
             TopAppBar(
                 title = { Text(stringResource(R.string.property_detail_title), color = OnBackground, fontWeight = FontWeight.Bold) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = stringResource(R.string.back), tint = Primary)
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.back), tint = Primary)
                     }
                 },
                 actions = {
@@ -154,7 +192,10 @@ fun PropertyDetailScreen(
                                     .crossfade(true)
                                     .build(),
                                 contentDescription = null,
-                                modifier = Modifier.fillMaxSize().clip(RoundedCornerShape(24.dp)),
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .clip(RoundedCornerShape(24.dp))
+                                    .clickable { onViewPhotos(listOf(prop.imageUrl), 0) },
                                 contentScale = ContentScale.Crop
                             )
                             // Overlay gradient for better text visibility
@@ -225,7 +266,11 @@ fun PropertyDetailScreen(
                             verticalAlignment = Alignment.Bottom
                         ) {
                             Column {
-                                Text(stringResource(R.string.monthly_rent, currentCurrency), style = MaterialTheme.typography.labelMedium, color = OnSurfaceVariant)
+                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                    Icon(currencyIcon, contentDescription = null, tint = OnSurfaceVariant, modifier = Modifier.size(16.dp))
+                                    Spacer(Modifier.width(4.dp))
+                                    Text(stringResource(R.string.monthly_rent, currentCurrency), style = MaterialTheme.typography.labelMedium, color = OnSurfaceVariant)
+                                }
                                 Spacer(Modifier.height(4.dp))
                                 Text(formatter.format(prop.monthlyRent), style = MaterialTheme.typography.headlineLarge, color = Primary, fontWeight = FontWeight.Black)
                             }
@@ -334,7 +379,7 @@ fun PropertyDetailScreen(
                             Row(verticalAlignment = Alignment.CenterVertically) {
                                 Icon(Icons.Default.Gavel, contentDescription = null, tint = Primary, modifier = Modifier.size(20.dp))
                                 Spacer(Modifier.width(8.dp))
-                                Text("REGLAS DE LA PROPIEDAD", style = MaterialTheme.typography.labelMedium, color = Primary, fontWeight = FontWeight.Bold, letterSpacing = 1.sp)
+                                Text(stringResource(R.string.property_rules), style = MaterialTheme.typography.labelMedium, color = Primary, fontWeight = FontWeight.Bold, letterSpacing = 1.sp)
                             }
                             Spacer(Modifier.height(8.dp))
                             Text(prop.rules!!, style = MaterialTheme.typography.bodyMedium, color = OnBackground, lineHeight = 22.sp)
@@ -360,6 +405,7 @@ fun PropertyDetailScreen(
                         dateFormat = dateFormat,
                         formatter = formatter,
                         onAddPaymentClick = { onAddPaymentClick(contract.id) },
+                        onFinalizeClick = { contractToFinalize = contract },
                         onClick = { onContractClick(contract.id) }
                     )
                 }
@@ -381,8 +427,67 @@ fun PropertyDetailScreen(
                             dateFormat = dateFormat,
                             formatter = formatter,
                             onAddPaymentClick = { onAddPaymentClick(contract.id) },
+                            onFinalizeClick = {},
                             onClick = { onContractClick(contract.id) }
                         )
+                    }
+                }
+
+                // Repair Budgets Action
+                item {
+                    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(12.dp)
+                        ) {
+                            Button(
+                                onClick = { onBudgetClick(propertyId) },
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .height(56.dp)
+                                    .clip(RoundedCornerShape(12.dp))
+                                    .border(1.dp, Primary.copy(0.3f), RoundedCornerShape(12.dp)),
+                                colors = ButtonDefaults.buttonColors(containerColor = SurfaceContainerLow)
+                            ) {
+                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                    Icon(Icons.Default.Build, contentDescription = null, tint = Primary)
+                                    Spacer(Modifier.width(8.dp))
+                                    Text(stringResource(R.string.budget_manager), color = Primary, fontWeight = FontWeight.Bold, fontSize = 12.sp)
+                                }
+                            }
+
+                            Button(
+                                onClick = { onAddExpenseClick(propertyId) },
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .height(56.dp)
+                                    .clip(RoundedCornerShape(12.dp))
+                                    .border(1.dp, Tertiary.copy(0.3f), RoundedCornerShape(12.dp)),
+                                colors = ButtonDefaults.buttonColors(containerColor = SurfaceContainerLow)
+                            ) {
+                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                    Icon(Icons.Default.ReceiptLong, contentDescription = null, tint = Tertiary)
+                                    Spacer(Modifier.width(8.dp))
+                                    Text(stringResource(R.string.add_expense), color = Tertiary, fontWeight = FontWeight.Bold, fontSize = 12.sp)
+                                }
+                            }
+                        }
+
+                        Button(
+                            onClick = { onAddConditionClick(propertyId, null, "CHECK_IN") },
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(56.dp)
+                                .clip(RoundedCornerShape(12.dp))
+                                .border(1.dp, Primary.copy(0.3f), RoundedCornerShape(12.dp)),
+                            colors = ButtonDefaults.buttonColors(containerColor = SurfaceContainerLow)
+                        ) {
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Icon(Icons.Default.CameraAlt, contentDescription = null, tint = Primary)
+                                Spacer(Modifier.width(8.dp))
+                                Text(stringResource(R.string.add_condition_report), color = Primary, fontWeight = FontWeight.Bold)
+                            }
+                        }
                     }
                 }
 
@@ -426,6 +531,7 @@ private fun ContractItem(
     dateFormat: SimpleDateFormat, 
     formatter: NumberFormat,
     onAddPaymentClick: () -> Unit,
+    onFinalizeClick: () -> Unit,
     onClick: () -> Unit
 ) {
     val isPast = contract.status != "ACTIVE"
@@ -440,48 +546,85 @@ private fun ContractItem(
             .border(1.dp, Color.White.copy(alpha = 0.05f), RoundedCornerShape(16.dp))
             .clickable { onClick() }
     ) {
-        Row(modifier = Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
-            Box(
-                modifier = Modifier
-                    .size(48.dp)
-                    .background(Primary.copy(alpha = 0.1f), RoundedCornerShape(12.dp)),
-                contentAlignment = Alignment.Center
-            ) {
-                Icon(Icons.Default.Description, contentDescription = null, tint = Primary, modifier = Modifier.size(24.dp))
-            }
-            Spacer(Modifier.width(16.dp))
-            Column(Modifier.weight(1f)) {
-                Text(stringResource(R.string.contract_number, contract.id), color = OnBackground, fontWeight = FontWeight.Bold, style = MaterialTheme.typography.titleMedium)
-                Spacer(Modifier.height(4.dp))
-                Text("${dateFormat.format(contract.startDate)} → ${dateFormat.format(contract.endDate)}",
-                    color = OnSurfaceVariant, style = MaterialTheme.typography.bodySmall)
-            }
-            Column(horizontalAlignment = Alignment.End) {
-                Text(formatter.format(contract.monthlyRent), color = Tertiary, fontWeight = FontWeight.Black, style = MaterialTheme.typography.titleMedium)
-                Spacer(Modifier.height(4.dp))
-                Surface(
-                    color = if(contract.status == "ACTIVE") Primary.copy(0.15f) else OutlineVariant.copy(0.1f),
-                    shape = RoundedCornerShape(12.dp)
+        Column(modifier = Modifier.padding(16.dp)) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Box(
+                    modifier = Modifier
+                        .size(48.dp)
+                        .background(Primary.copy(alpha = 0.1f), RoundedCornerShape(12.dp)),
+                    contentAlignment = Alignment.Center
                 ) {
+                    Icon(Icons.Default.Description, contentDescription = null, tint = Primary, modifier = Modifier.size(24.dp))
+                }
+                Spacer(Modifier.width(16.dp))
+                Column(Modifier.weight(1f)) {
                     Text(
-                        if(contract.status == "ACTIVE") stringResource(R.string.status_active) else contract.status,
-                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
-                        color = if(contract.status == "ACTIVE") Primary else OnSurfaceVariant, 
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 11.sp
+                        stringResource(R.string.contract_number, contract.id), 
+                        color = OnBackground, 
+                        fontWeight = FontWeight.Bold, 
+                        style = MaterialTheme.typography.titleMedium,
+                        maxLines = 1
+                    )
+                    Spacer(Modifier.height(4.dp))
+                    Text(
+                        "${dateFormat.format(contract.startDate)} → ${dateFormat.format(contract.endDate)}",
+                        color = OnSurfaceVariant, 
+                        style = MaterialTheme.typography.bodySmall,
+                        maxLines = 1
                     )
                 }
-                if (contract.status == "ACTIVE") {
-                    Spacer(Modifier.height(8.dp))
+                Column(horizontalAlignment = Alignment.End) {
+                    Text(
+                        formatter.format(contract.monthlyRent), 
+                        color = Tertiary, 
+                        fontWeight = FontWeight.Black, 
+                        style = MaterialTheme.typography.titleMedium
+                    )
+                    Spacer(Modifier.height(4.dp))
+                    Surface(
+                        color = if(contract.status == "ACTIVE") Primary.copy(0.15f) else OutlineVariant.copy(0.1f),
+                        shape = RoundedCornerShape(12.dp)
+                    ) {
+                        Text(
+                            if(contract.status == "ACTIVE") stringResource(R.string.status_active) else contract.status,
+                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                            color = if(contract.status == "ACTIVE") Primary else OnSurfaceVariant, 
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 11.sp
+                        )
+                    }
+                }
+            }
+
+            if (contract.status == "ACTIVE") {
+                Spacer(Modifier.height(12.dp))
+                HorizontalDivider(color = OutlineVariant.copy(0.1f))
+                Spacer(Modifier.height(8.dp))
+                Column(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalAlignment = Alignment.End,
+                    verticalArrangement = Arrangement.spacedBy(4.dp)
+                ) {
                     TextButton(
                         onClick = onAddPaymentClick,
                         colors = ButtonDefaults.textButtonColors(contentColor = Tertiary),
-                        contentPadding = PaddingValues(horizontal = 8.dp, vertical = 4.dp),
-                        modifier = Modifier.height(32.dp)
+                        contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp),
+                        modifier = Modifier.height(36.dp)
                     ) {
-                        Icon(Icons.Default.Add, contentDescription = null, modifier = Modifier.size(16.dp))
-                        Spacer(Modifier.width(4.dp))
-                        Text(stringResource(R.string.add_payment), fontSize = 12.sp, fontWeight = FontWeight.Bold)
+                        Icon(Icons.Default.Add, contentDescription = null, modifier = Modifier.size(18.dp))
+                        Spacer(Modifier.width(6.dp))
+                        Text(stringResource(R.string.add_payment), fontSize = 13.sp, fontWeight = FontWeight.Bold)
+                    }
+                    
+                    TextButton(
+                        onClick = onFinalizeClick,
+                        colors = ButtonDefaults.textButtonColors(contentColor = Error),
+                        contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp),
+                        modifier = Modifier.height(36.dp)
+                    ) {
+                        Icon(Icons.Default.Cancel, contentDescription = null, modifier = Modifier.size(18.dp))
+                        Spacer(Modifier.width(6.dp))
+                        Text(stringResource(R.string.finalize), fontSize = 13.sp, fontWeight = FontWeight.Bold)
                     }
                 }
             }

@@ -15,11 +15,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.material3.TabRowDefaults.SecondaryIndicator
 import androidx.compose.material3.TabRowDefaults.tabIndicatorOffset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.*
 import androidx.navigation.NavHostController
+import com.example.rentapp.R
 import com.example.rentapp.data.local.entity.Payment
-import com.example.rentapp.ui.screens.property.EmptyState
+import com.example.rentapp.ui.components.EmptyState
 import com.example.rentapp.ui.theme.*
 import com.example.rentapp.ui.components.RentAppBottomBar
 import com.example.rentapp.viewmodel.PaymentViewModel
@@ -37,12 +39,37 @@ fun PaymentListScreen(
     onBack: () -> Unit
 ) {
     var selectedTab by remember { mutableIntStateOf(0) }
+    var showDeleteConfirm by remember { mutableStateOf(false) }
     val pendingPayments by viewModel.pendingPayments.collectAsState()
     val delayedPayments by viewModel.delayedPayments.collectAsState()
     val paidPayments by viewModel.paidPayments.collectAsState()
     val delayedCount by viewModel.delayedCount.collectAsState()
 
-    val tabs = listOf("Pendiente", "Atrasado", "Finalizado")
+    if (showDeleteConfirm) {
+        AlertDialog(
+            onDismissRequest = { showDeleteConfirm = false },
+            title = { Text("¿Borrar historial de pagos?") },
+            text = { Text("Esta acción eliminará permanentemente todos los registros de pagos finalizados. No se puede deshacer.") },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        viewModel.clearPaidHistory()
+                        showDeleteConfirm = false
+                    },
+                    colors = ButtonDefaults.textButtonColors(contentColor = Error)
+                ) { Text("Borrar Todo") }
+            },
+            dismissButton = {
+                TextButton(onClick = { showDeleteConfirm = false }) { Text("Cancelar") }
+            }
+        )
+    }
+
+    val tabs = listOf(
+        stringResource(R.string.status_pending),
+        stringResource(R.string.status_delayed),
+        stringResource(R.string.status_paid)
+    )
     val currentList = when (selectedTab) { 0 -> pendingPayments; 1 -> delayedPayments; else -> paidPayments }
 
     Scaffold(
@@ -56,7 +83,7 @@ fun PaymentListScreen(
                 },
                 actions = {
                     if (selectedTab == 2 && paidPayments.isNotEmpty()) {
-                        IconButton(onClick = { viewModel.clearPaidHistory() }) {
+                        IconButton(onClick = { showDeleteConfirm = true }) {
                             Icon(Icons.Default.DeleteSweep, contentDescription = "Limpiar Historial", tint = Error)
                         }
                     }
@@ -96,13 +123,18 @@ fun PaymentListScreen(
             }
 
             if (currentList.isEmpty()) {
+                val (emptyMsg, emptyDesc, emptyIcon) = when (selectedTab) {
+                    0 -> Triple(stringResource(R.string.empty_payments_title), stringResource(R.string.empty_payments_desc), Icons.Default.CheckCircle)
+                    1 -> Triple("¡Excelente historial!", "No hay inquilinos con pagos atrasados.", Icons.Default.Mood)
+                    else -> Triple("Historial vacío", "Aquí aparecerán los pagos que vayas completando.", Icons.Default.History)
+                }
+                
                 EmptyState(
-                    message = when (selectedTab) {
-                        0 -> "No hay pagos pendientes"
-                        1 -> "No hay pagos atrasados 🎉"
-                        else -> "No hay pagos finalizados"
-                    },
-                    icon = if (selectedTab == 1) Icons.Default.CheckCircle else Icons.Default.Payments
+                    message = emptyMsg,
+                    description = emptyDesc,
+                    icon = emptyIcon,
+                    actionLabel = if (selectedTab == 0) stringResource(R.string.register_payment) else null,
+                    onActionClick = onAddClick
                 )
             } else {
                 LazyColumn(

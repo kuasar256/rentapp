@@ -11,6 +11,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -32,6 +33,7 @@ import org.osmdroid.views.overlay.Marker as OsmdroidMarker
 import androidx.compose.ui.viewinterop.AndroidView
 import com.example.rentapp.R
 import com.example.rentapp.data.local.entity.Property
+import com.example.rentapp.data.preferences.PreferencesManager
 import com.example.rentapp.ui.screens.auth.NeonTextField
 import com.example.rentapp.ui.theme.*
 import com.example.rentapp.ui.components.ImagePickerField
@@ -64,6 +66,11 @@ fun AddPropertyScreen(
     var paymentType by remember { mutableStateOf(existingProperty?.paymentType ?: "Efectivo") }
     var description by remember { mutableStateOf(existingProperty?.description ?: "") }
     var rules by remember { mutableStateOf(existingProperty?.rules ?: "") }
+
+    // Validation States
+    var nameError by remember { mutableStateOf<String?>(null) }
+    var addressError by remember { mutableStateOf<String?>(null) }
+    var rentError by remember { mutableStateOf<String?>(null) }
     
     // Updated imageUri to handle String paths directly (fix for the bug)
     var imageUri by remember { mutableStateOf(existingProperty?.imageUrl) }
@@ -79,7 +86,8 @@ fun AddPropertyScreen(
     val geocoder = remember { Geocoder(context, Locale.getDefault()) }
     
     // Get currency from PreferencesManager
-    val currentCurrency by com.example.rentapp.data.preferences.PreferencesManager.getCurrencyFlow(context).collectAsState(initial = "USD")
+    val currentCurrency by PreferencesManager.getCurrencyFlow(context).collectAsState(initial = "USD")
+    val currencyIcon = if (currentCurrency == "BOB") Icons.Default.Payments else Icons.Default.AttachMoney
     
     // OSmdroid Setup
     DisposableEffect(Unit) {
@@ -187,7 +195,7 @@ fun AddPropertyScreen(
                 },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = stringResource(R.string.back), tint = Primary)
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.back), tint = Primary)
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(containerColor = Background)
@@ -206,11 +214,17 @@ fun AddPropertyScreen(
             Spacer(Modifier.height(8.dp))
 
             SectionLabel(stringResource(R.string.property_info))
+            Spacer(Modifier.height(4.dp))
             NeonTextField(
                 value = name,
-                onValueChange = { name = it },
+                onValueChange = { 
+                    name = it
+                    if (it.isNotBlank()) nameError = null
+                },
                 label = stringResource(R.string.property_name),
-                leadingIcon = Icons.Default.Home
+                leadingIcon = Icons.Default.Home,
+                isError = nameError != null,
+                supportingText = nameError?.let { { Text(it, color = MaterialTheme.colorScheme.error) } }
             )
 
             // Type dropdown
@@ -220,7 +234,7 @@ fun AddPropertyScreen(
                     label = { Text(stringResource(R.string.property_type), color = OnSurfaceVariant) },
                     leadingIcon = { Icon(Icons.Default.Domain, contentDescription = null, tint = OnSurfaceVariant) },
                     trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = typeDropdownExpanded) },
-                    modifier = Modifier.fillMaxWidth().menuAnchor(),
+                    modifier = Modifier.fillMaxWidth().menuAnchor(MenuAnchorType.PrimaryNotEditable),
                     colors = OutlinedTextFieldDefaults.colors(
                         focusedTextColor = OnBackground, unfocusedTextColor = OnBackground,
                         focusedBorderColor = Primary, unfocusedBorderColor = OutlineVariant,
@@ -244,9 +258,14 @@ fun AddPropertyScreen(
 
             NeonTextField(
                 value = address, 
-                onValueChange = { address = it }, 
+                onValueChange = { 
+                    address = it
+                    if (it.isNotBlank()) addressError = null
+                }, 
                 label = stringResource(R.string.address), 
                 leadingIcon = Icons.Default.LocationOn,
+                isError = addressError != null,
+                supportingText = addressError?.let { { Text(it, color = MaterialTheme.colorScheme.error) } },
                 trailingIcon = {
                     IconButton(onClick = { searchAddress(address) }) {
                         Icon(Icons.Default.Search, contentDescription = stringResource(R.string.search_on_map), tint = Primary)
@@ -255,6 +274,7 @@ fun AddPropertyScreen(
             )
 
             SectionLabel(stringResource(R.string.map_location_title))
+            Spacer(Modifier.height(4.dp))
             Text(stringResource(R.string.map_location_hint), style = MaterialTheme.typography.bodySmall, color = OnSurfaceVariant)
             Box(
                 modifier = Modifier
@@ -309,12 +329,20 @@ fun AddPropertyScreen(
             }
 
             SectionLabel(stringResource(R.string.details))
+            Spacer(Modifier.height(4.dp))
             NeonTextField(
                 value = monthlyRent, 
-                onValueChange = { if (it.isEmpty() || it.all { char -> char.isDigit() || char == '.' }) monthlyRent = it }, 
+                onValueChange = { 
+                    if (it.isEmpty() || it.all { char -> char.isDigit() || char == '.' }) {
+                        monthlyRent = it
+                        rentError = null
+                    }
+                }, 
                 label = stringResource(R.string.monthly_rent, currentCurrency.uppercase()),
-                leadingIcon = Icons.Default.AttachMoney, 
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal)
+                leadingIcon = currencyIcon,
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
+                isError = rentError != null,
+                supportingText = rentError?.let { { Text(it, color = MaterialTheme.colorScheme.error) } }
             )
 
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
@@ -344,7 +372,8 @@ fun AddPropertyScreen(
             )
 
             // Payment Type Selector
-            SectionLabel("Modalidad de Pago")
+            SectionLabel(stringResource(R.string.payment_modality))
+            Spacer(Modifier.height(4.dp))
             ExposedDropdownMenuBox(
                 expanded = paymentTypeDropdownExpanded,
                 onExpandedChange = { paymentTypeDropdownExpanded = it }
@@ -353,10 +382,10 @@ fun AddPropertyScreen(
                     value = paymentType,
                     onValueChange = {},
                     readOnly = true,
-                    label = { Text("Tipo de Contrato", color = OnSurfaceVariant) },
+                    label = { Text(stringResource(R.string.contract_type), color = OnSurfaceVariant) },
                     leadingIcon = { Icon(Icons.Default.Payments, contentDescription = null, tint = Primary) },
                     trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = paymentTypeDropdownExpanded) },
-                    modifier = Modifier.fillMaxWidth().menuAnchor(),
+                    modifier = Modifier.fillMaxWidth().menuAnchor(MenuAnchorType.PrimaryNotEditable),
                     colors = OutlinedTextFieldDefaults.colors(
                         focusedTextColor = OnBackground, unfocusedTextColor = OnBackground,
                         focusedBorderColor = Primary, unfocusedBorderColor = OutlineVariant,
@@ -369,7 +398,10 @@ fun AddPropertyScreen(
                     onDismissRequest = { paymentTypeDropdownExpanded = false },
                     modifier = Modifier.background(SurfaceContainerHigh)
                 ) {
-                    listOf("Efectivo", "Anticrético").forEach { mode ->
+                    listOf(
+                        stringResource(R.string.cash),
+                        stringResource(R.string.anticretico)
+                    ).forEach { mode ->
                         DropdownMenuItem(
                             text = { Text(mode, color = OnBackground) },
                             onClick = { 
@@ -390,7 +422,7 @@ fun AddPropertyScreen(
                         label = { Text(stringResource(R.string.status), color = OnSurfaceVariant) },
                         leadingIcon = { Icon(Icons.Default.Circle, contentDescription = null, tint = when(selectedStatus) { "AVAILABLE" -> Primary; "RENTED" -> Tertiary; else -> Error }) },
                         trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = statusDropdownExpanded) },
-                        modifier = Modifier.fillMaxWidth().menuAnchor(),
+                        modifier = Modifier.fillMaxWidth().menuAnchor(MenuAnchorType.PrimaryNotEditable),
                         colors = OutlinedTextFieldDefaults.colors(
                             focusedTextColor = OnBackground, unfocusedTextColor = OnBackground,
                             focusedBorderColor = Primary, unfocusedBorderColor = OutlineVariant,
@@ -422,8 +454,8 @@ fun AddPropertyScreen(
 
             OutlinedTextField(
                 value = rules, onValueChange = { rules = it },
-                label = { Text("Reglas del Inmueble", color = OnSurfaceVariant) },
-                placeholder = { Text("Ej: No mascotas, no fiestas...", color = OnSurfaceVariant.copy(alpha = 0.5f)) },
+                label = { Text(stringResource(R.string.property_rules_label), color = OnSurfaceVariant) },
+                placeholder = { Text(stringResource(R.string.property_rules_hint), color = OnSurfaceVariant.copy(alpha = 0.5f)) },
                 modifier = Modifier.fillMaxWidth().height(100.dp),
                 colors = OutlinedTextFieldDefaults.colors(
                     focusedTextColor = OnBackground, unfocusedTextColor = OnBackground,
@@ -434,6 +466,7 @@ fun AddPropertyScreen(
             )
 
             SectionLabel(stringResource(R.string.property_photo))
+            Spacer(Modifier.height(4.dp))
             ImagePickerField(
                 label = stringResource(R.string.tap_to_add_photo),
                 imageUri = imageUri,
@@ -449,30 +482,51 @@ fun AddPropertyScreen(
                     .clip(RoundedCornerShape(12.dp))
                     .background(
                         Brush.horizontalGradient(listOf(NeonGradientStart, NeonGradientEnd)),
-                        alpha = if (isSaving || name.isBlank() || address.isBlank()) 0.5f else 1f
+                        alpha = if (isSaving) 0.5f else 1f
                     )
-                    .clickable(enabled = !isSaving && name.isNotBlank() && address.isNotBlank()) {
-                        isSaving = true
-                        scope.launch {
-                            val property = Property(
-                                id = existingProperty?.id ?: 0L,
-                                name = name, address = address, type = type,
-                                monthlyRent = monthlyRent.toDoubleOrNull() ?: 0.0,
-                                rooms = rooms.toIntOrNull() ?: 0,
-                                bathrooms = bathrooms.toIntOrNull() ?: 0,
-                                area = area.toDoubleOrNull() ?: 0.0,
-                                latitude = selectedPosition.value.latitude,
-                                longitude = selectedPosition.value.longitude,
-                                status = selectedStatus, 
-                                paymentType = paymentType,
-                                description = description,
-                                rules = rules,
-                                imageUrl = imageUri ?: ""
-                            )
-                            if (isEditing) viewModel.updateProperty(property) else viewModel.insertProperty(property)
-                            // Small delay to ensure DB operation is dispatched
-                            kotlinx.coroutines.delay(500)
-                            onSuccess()
+                    .clickable(enabled = !isSaving) {
+                        // Validate before saving
+                        var hasError = false
+                        if (name.isBlank()) {
+                            nameError = context.resources.getString(R.string.error_field_required)
+                            hasError = true
+                        }
+                        if (address.isBlank()) {
+                            addressError = context.resources.getString(R.string.error_field_required)
+                            hasError = true
+                        }
+                        if (monthlyRent.isBlank()) {
+                            rentError = context.resources.getString(R.string.error_field_required)
+                            hasError = true
+                        }
+
+                        if (!hasError) {
+                            isSaving = true
+                            scope.launch {
+                                try {
+                                    val property = Property(
+                                        id = existingProperty?.id ?: 0L,
+                                        name = name, address = address, type = type,
+                                        monthlyRent = monthlyRent.toDoubleOrNull() ?: 0.0,
+                                        rooms = rooms.toIntOrNull() ?: 0,
+                                        bathrooms = bathrooms.toIntOrNull() ?: 0,
+                                        area = area.toDoubleOrNull() ?: 0.0,
+                                        latitude = selectedPosition.value.latitude,
+                                        longitude = selectedPosition.value.longitude,
+                                        status = selectedStatus, 
+                                        paymentType = paymentType,
+                                        description = description,
+                                        rules = rules,
+                                        imageUrl = imageUri ?: ""
+                                    )
+                                    if (isEditing) viewModel.updateProperty(property) else viewModel.insertProperty(property)
+                                    kotlinx.coroutines.delay(500)
+                                    onSuccess()
+                                } catch (e: Exception) {
+                                    isSaving = false
+                                    // Could add a Toast here
+                                }
+                            }
                         }
                     },
                 contentAlignment = Alignment.Center

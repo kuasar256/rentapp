@@ -1,0 +1,162 @@
+main/
+├─ java/
+│  └─ com/
+│     └─ example/
+│        └─ rentapp/
+│           ├─ auth/
+│           │  ├─ BiometricHelper.kt
+│           │  └─ GoogleSignInService.kt
+│           ├─ data/
+│           │  ├─ local/
+│           │  │  ├─ dao/
+│           │  │  │  ├─ ContractDao.kt
+│           │  │  │  ├─ PaymentDao.kt
+│           │  │  │  ├─ PropertyDao.kt
+│           │  │  │  ├─ RepairBudgetDao.kt
+│           │  │  │  ├─ TenantDao.kt
+│           │  │  │  └─ UserDao.kt
+│           │  │  ├─ entity/
+│           │  │  │  ├─ Contract.kt
+│           │  │  │  ├─ Payment.kt
+│           │  │  │  ├─ Property.kt
+│           │  │  │  ├─ RepairBudget.kt
+│           │  │  │  ├─ Tenant.kt
+│           │  │  │  └─ User.kt
+│           │  │  ├─ AppDatabase.kt
+│           │  │  └─ DataSeeder.kt
+│           │  ├─ preferences/
+│           │  │  └─ PreferencesManager.kt
+│           │  └─ repository/
+│           │     ├─ ContractRepository.kt
+│           │     ├─ PaymentRepository.kt
+│           │     ├─ PropertyRepository.kt
+│           │     ├─ RepairBudgetRepository.kt
+│           │     ├─ TenantRepository.kt
+│           │     └─ UserRepository.kt
+│           ├─ domain/
+│           │  └─ usecase/
+│           │     ├─ RegisterTenantUseCase.kt
+│           │     └─ ValidateRequiredFieldUseCase.kt
+│           ├─ network/
+│           │  ├─ api/
+│           │  │  ├─ CountriesApi.kt
+│           │  │  └─ ExchangeRateApi.kt
+│           │  ├─ model/
+│           │  │  ├─ CountryResponse.kt
+│           │  │  └─ ExchangeRateResponse.kt
+│           │  └─ RetrofitInstance.kt
+│           ├─ notification/
+│           │  ├─ NotificationHelper.kt
+│           │  └─ RentAppMessagingService.kt
+│           ├─ sync/
+│           │  └─ FirestoreSyncManager.kt
+│           ├─ ui/
+│           │  ├─ components/
+│           │  │  ├─ locale/
+│           │  │  │  └─ LocaleManager.kt
+│           │  │  ├─ AnalyticsCharts.kt
+│           │  │  ├─ EmptyState.kt
+│           │  │  ├─ ImagePickerField.kt
+│           │  │  └─ RentAppBottomBar.kt
+│           │  ├─ navigation/
+│           │  │  ├─ RentAppNavGraph.kt
+│           │  │  └─ Screen.kt
+│           │  ├─ screens/
+│           │  │  ├─ auth/
+│           │  │  │  ├─ BiometricLockScreen.kt
+│           │  │  │  ├─ LoginScreen.kt
+│           │  │  │  └─ RegisterScreen.kt
+│           │  │  ├─ budget/
+│           │  │  │  ├─ AddRepairBudgetScreen.kt
+│           │  │  │  └─ RepairBudgetListScreen.kt
+│           │  │  ├─ contract/
+│           │  │  │  ├─ AddContractScreen.kt
+│           │  │  │  └─ ContractDetailScreen.kt
+│           │  │  ├─ dashboard/
+│           │  │  │  └─ DashboardScreen.kt
+│           │  │  ├─ onboarding/
+│           │  │  │  └─ OnboardingScreen.kt
+│           │  │  ├─ payment/
+│           │  │  │  ├─ AddPaymentScreen.kt
+│           │  │  │  ├─ DelinquencyAlertsScreen.kt
+│           │  │  │  ├─ PaymentDetailScreen.kt
+│           │  │  │  ├─ PaymentHistoryScreen.kt
+│           │  │  │  └─ PaymentListScreen.kt
+│           │  │  ├─ profile/
+│           │  │  │  └─ UserProfileScreen.kt
+│           │  │  ├─ property/
+│           │  │  │  ├─ AddPropertyScreen.kt
+│           │  │  │  ├─ PropertyDetailScreen.kt
+│           │  │  │  └─ PropertyListScreen.kt
+│           │  │  ├─ reports/
+│           │  │  │  └─ AnnualReportsScreen.kt
+│           │  │  ├─ Splash/
+│           │  │  │  └─ SplashScreen.kt
+│           │  │  └─ tenant/
+│           │  │     ├─ AddTenantScreen.kt
+│           │  │     ├─ TenantDetailScreen.kt
+│           │  │     └─ TenantListScreen.kt
+│           │  └─ theme/
+│           │     ├─ Color.kt
+│           │     ├─ Theme.kt
+│           │     └─ Type.kt
+│           ├─ util/
+│           │  ├─ CsvHelper.kt
+│           │  └─ PdfHelper.kt
+│           ├─ viewmodel/
+│           │  ├─ ContractViewModel.kt
+│           │  ├─ LanguageViewModel.kt
+│           │  ├─ PaymentViewModel.kt
+│           │  ├─ PropertyViewModel.kt
+│           │  ├─ RepairBudgetViewModel.kt
+│           │  ├─ TenantViewModel.kt
+│           │  └─ UserViewModel.kt
+│           ├─ worker/
+│           │  ├─ PaymentAuditWorker.kt
+│           │  ├─ PaymentReminderWorker.kt
+│           │  ├─ ReminderManager.kt
+│           │  └─ SyncWorker.kt
+│           ├─ DEMO.TXT
+│           ├─ MainActivity.kt
+│           └─ RentApp.kt
+├─ res/
+│  ├─ drawable/
+│  │  ├─ ic_launcher_background.xml
+│  │  └─ ic_launcher_foreground.xml
+│  ├─ mipmap-anydpi/
+│  │  ├─ ic_launcher_round.xml
+│  │  └─ ic_launcher.xml
+│  ├─ mipmap-hdpi/
+│  │  ├─ ic_launcher_round.webp
+│  │  └─ ic_launcher.webp
+│  ├─ mipmap-mdpi/
+│  │  ├─ ic_launcher_round.webp
+│  │  └─ ic_launcher.webp
+│  ├─ mipmap-xhdpi/
+│  │  ├─ ic_launcher_round.webp
+│  │  └─ ic_launcher.webp
+│  ├─ mipmap-xxhdpi/
+│  │  ├─ ic_launcher_round.webp
+│  │  └─ ic_launcher.webp
+│  ├─ mipmap-xxxhdpi/
+│  │  ├─ ic_launcher_round.webp
+│  │  └─ ic_launcher.webp
+│  ├─ values/
+│  │  ├─ colors.xml
+│  │  ├─ strings.xml
+│  │  └─ themes.xml
+│  ├─ values-de/
+│  │  └─ strings.xml
+│  ├─ values-en/
+│  │  └─ strings.xml
+│  ├─ values-fr/
+│  │  └─ strings.xml
+│  ├─ values-night/
+│  │  └─ themes.xml
+│  ├─ values-pt/
+│  │  └─ strings.xml
+│  └─ xml/
+│     ├─ backup_rules.xml
+│     ├─ data_extraction_rules.xml
+│     └─ file_paths.xml
+└─ AndroidManifest.xml

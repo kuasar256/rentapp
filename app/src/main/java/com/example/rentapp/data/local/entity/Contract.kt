@@ -30,6 +30,7 @@ data class Contract(
     val earlyTerminationPenalty: Double = 0.0,
     val guarantorName: String = "",
     val guarantorProperty: String = "",
+    val documentImageUris: String = "", // Comma-separated list of local URIs
     val createdAt: Long = System.currentTimeMillis(),
     val updatedAt: Long = System.currentTimeMillis(),
     val remoteId: String? = null

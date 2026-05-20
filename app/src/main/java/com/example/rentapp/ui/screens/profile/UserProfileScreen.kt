@@ -116,26 +116,26 @@ fun UserProfileScreen(
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             Spacer(Modifier.height(8.dp))
-            SectionLabel("Datos de Usuario")
-            NeonTextField(value = name, onValueChange = { name = it }, label = "Nombre Completo", leadingIcon = Icons.Default.Person)
-            NeonTextField(value = email, onValueChange = { email = it }, label = "Correo", leadingIcon = Icons.Default.Email)
+            SectionLabel(stringResource(id = R.string.user_data))
+            NeonTextField(value = name, onValueChange = { name = it }, label = stringResource(id = R.string.full_name), leadingIcon = Icons.Default.Person)
+            NeonTextField(value = email, onValueChange = { email = it }, label = stringResource(id = R.string.email), leadingIcon = Icons.Default.Email)
             NeonTextField(
                 value = phone,
                 onValueChange = { phone = it },
-                label = "Teléfono",
+                label = stringResource(id = R.string.phone),
                 leadingIcon = Icons.Default.Phone,
                 keyboardOptions = androidx.compose.foundation.text.KeyboardOptions(keyboardType = androidx.compose.ui.text.input.KeyboardType.Phone)
             )
-            NeonTextField(value = company, onValueChange = { company = it }, label = "Empresa", leadingIcon = Icons.Default.Business)
+            NeonTextField(value = company, onValueChange = { company = it }, label = stringResource(id = R.string.company), leadingIcon = Icons.Default.Business)
             
             Spacer(Modifier.height(16.dp))
-            SectionLabel("Configuración de Interfaz")
+            SectionLabel(stringResource(id = R.string.interface_config))
             
             // Selector de Idioma
             ExposedDropdownMenuBox(expanded = languageExpanded, onExpandedChange = { languageExpanded = it }) {
                 OutlinedTextField(
                     value = selectedLanguage, onValueChange = {}, readOnly = true,
-                    label = { Text("Idioma", color = OnSurfaceVariant) },
+                    label = { Text(stringResource(id = R.string.language), color = OnSurfaceVariant) },
                     leadingIcon = { Icon(Icons.Default.Translate, contentDescription = null, tint = OnSurfaceVariant) },
                     trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = languageExpanded) },
                     modifier = Modifier.fillMaxWidth().menuAnchor(),
@@ -162,6 +162,7 @@ fun UserProfileScreen(
                                     }
                                 )
                                 languageExpanded = false
+                                (context as? android.app.Activity)?.recreate()
                             }
                         )
                     }
@@ -173,7 +174,7 @@ fun UserProfileScreen(
             val biometricEnabled by PreferencesManager.getBiometricEnabledFlow(context).collectAsState(initial = false)
 
             Spacer(Modifier.height(8.dp))
-            SectionLabel("Seguridad")
+            SectionLabel(stringResource(id = R.string.security))
             Row(
                 modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
                 verticalAlignment = Alignment.CenterVertically
@@ -181,8 +182,8 @@ fun UserProfileScreen(
                 Icon(Icons.Default.Fingerprint, contentDescription = null, tint = Tertiary)
                 Spacer(Modifier.width(16.dp))
                 Column(modifier = Modifier.weight(1f)) {
-                    Text("Bloqueo Biométrico", style = MaterialTheme.typography.bodyLarge, color = OnBackground)
-                    Text("Proteger inicio de la aplicación", style = MaterialTheme.typography.bodySmall, color = OnSurfaceVariant)
+                    Text(stringResource(id = R.string.biometric_lock), style = MaterialTheme.typography.bodyLarge, color = OnBackground)
+                    Text(stringResource(id = R.string.biometric_lock_desc), style = MaterialTheme.typography.bodySmall, color = OnSurfaceVariant)
                 }
                 Switch(
                     checked = biometricEnabled,
@@ -209,16 +210,16 @@ fun UserProfileScreen(
             }
             
             Spacer(Modifier.height(8.dp))
-            SectionLabel("Moneda Base")
+            SectionLabel(stringResource(id = R.string.base_currency))
             Text(
-                "Elija la moneda principal de operaciones. Los precios se convertirán y mostrarán de acuerdo a esto.",
+                stringResource(id = R.string.base_currency_desc),
                 style = MaterialTheme.typography.bodySmall, color = OnSurfaceVariant
             )
             ExposedDropdownMenuBox(expanded = currencyExpanded, onExpandedChange = { currencyExpanded = it }) {
                 OutlinedTextField(
                     value = selectedCurrency, onValueChange = {}, readOnly = true,
-                    label = { Text("Moneda", color = OnSurfaceVariant) },
-                    leadingIcon = { Icon(Icons.Default.AttachMoney, contentDescription = null, tint = OnSurfaceVariant) },
+                    label = { Text(stringResource(id = R.string.currency), color = OnSurfaceVariant) },
+                    leadingIcon = { Icon(if (selectedCurrency == "BOB") Icons.Default.Payments else Icons.Default.AttachMoney, contentDescription = null, tint = OnSurfaceVariant) },
                     trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = currencyExpanded) },
                     modifier = Modifier.fillMaxWidth().menuAnchor(),
                     colors = OutlinedTextFieldDefaults.colors(
@@ -267,7 +268,7 @@ fun UserProfileScreen(
                 colors = ButtonDefaults.buttonColors(containerColor = Primary),
                 shape = RoundedCornerShape(12.dp)
             ) {
-                Text("Guardar Cambios", color = OnPrimaryFixed, fontWeight = FontWeight.Bold)
+                Text(stringResource(id = R.string.save_changes), color = OnPrimaryFixed, fontWeight = FontWeight.Bold)
             }
             
             if (isSaved) {
@@ -280,7 +281,7 @@ fun UserProfileScreen(
                     containerColor = Primary,
                     contentColor = OnPrimaryFixed
                 ) {
-                    Text("Cambios guardados localmente", fontWeight = FontWeight.Bold)
+                    Text(stringResource(id = R.string.changes_saved_local), fontWeight = FontWeight.Bold)
                 }
             }
             Spacer(Modifier.height(32.dp))

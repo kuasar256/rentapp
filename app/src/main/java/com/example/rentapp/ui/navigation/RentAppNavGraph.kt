@@ -21,6 +21,9 @@ import com.example.rentapp.ui.screens.reports.AnnualReportsScreen
 import com.example.rentapp.ui.screens.tenant.*
 import com.example.rentapp.ui.screens.contract.*
 import com.example.rentapp.ui.screens.profile.UserProfileScreen
+import com.example.rentapp.ui.screens.budget.RepairBudgetListScreen
+import com.example.rentapp.ui.screens.budget.AddRepairBudgetScreen
+import com.example.rentapp.ui.screens.common.PhotoViewerScreen
 import com.example.rentapp.viewmodel.*
 import com.google.firebase.auth.FirebaseAuth
 
@@ -38,12 +41,19 @@ fun RentAppNavGraph(navController: NavHostController) {
     val paymentRepo = remember { PaymentRepository(db.paymentDao(), syncManager) }
     val contractRepo = remember { ContractRepository(db.contractDao(), syncManager) }
     val userRepo = remember { UserRepository(db.userDao(), syncManager) }
+    val repairBudgetRepo = remember { RepairBudgetRepository(db.repairBudgetDao()) }
+    val expenseRepo = remember { ExpenseRepository(db.expenseDao(), syncManager) }
+    val propertyConditionRepo = remember { PropertyConditionRepository(db.propertyConditionDao()) }
 
     val propertyViewModel: PropertyViewModel = viewModel(factory = PropertyViewModelFactory(propertyRepo))
     val tenantViewModel: TenantViewModel = viewModel(factory = TenantViewModelFactory(tenantRepo, paymentRepo, contractRepo))
     val paymentViewModel: PaymentViewModel = viewModel(factory = PaymentViewModelFactory(paymentRepo))
     val contractViewModel: ContractViewModel = viewModel(factory = ContractViewModelFactory(contractRepo))
     val userViewModel: UserViewModel = viewModel(factory = UserViewModelFactory(userRepo))
+    val repairBudgetViewModel: RepairBudgetViewModel = viewModel(factory = RepairBudgetViewModelFactory(repairBudgetRepo))
+    val expenseViewModel: ExpenseViewModel = viewModel(factory = ExpenseViewModelFactory(expenseRepo))
+    val propertyConditionViewModel: PropertyConditionViewModel = viewModel(factory = PropertyConditionViewModelFactory(propertyConditionRepo))
+    val languageViewModel = remember { LanguageViewModel(context) }
 
     NavHost(navController = navController, startDestination = Screen.Splash.route) {
 
@@ -63,6 +73,21 @@ fun RentAppNavGraph(navController: NavHostController) {
                     navController.navigate(Screen.BiometricLock.route) {
                         popUpTo(Screen.Splash.route) { inclusive = true }
                     }
+                },
+                onNavigateToOnboarding = {
+                    navController.navigate(Screen.Onboarding.route) {
+                        popUpTo(Screen.Splash.route) { inclusive = true }
+                    }
+                }
+            )
+        }
+
+        composable(Screen.Onboarding.route) {
+            com.example.rentapp.ui.screens.onboarding.OnboardingScreen(
+                onFinish = {
+                    navController.navigate(Screen.Dashboard.route) {
+                        popUpTo(Screen.Onboarding.route) { inclusive = true }
+                    }
                 }
             )
         }
@@ -71,7 +96,6 @@ fun RentAppNavGraph(navController: NavHostController) {
             BiometricLockScreen(
                 onAuthSuccess = {
                     if (!navController.popBackStack()) {
-                        // Fallback: Si no hay nada donde regresar, ir al Dashboard (si está logueado)
                         navController.navigate(Screen.Dashboard.route) {
                             popUpTo(0) { inclusive = true }
                         }
@@ -103,8 +127,8 @@ fun RentAppNavGraph(navController: NavHostController) {
                 propertyViewModel = propertyViewModel,
                 paymentViewModel = paymentViewModel,
                 tenantViewModel = tenantViewModel,
-                contractViewModel = contractViewModel,
                 userViewModel = userViewModel,
+                languageViewModel = languageViewModel,
                 navController = navController
             )
         }
@@ -136,7 +160,11 @@ fun RentAppNavGraph(navController: NavHostController) {
                 onAddContractClick = { navController.navigate(Screen.AddContract.createRoute(propertyId)) },
                 onContractClick = { cid -> navController.navigate(Screen.ContractDetail.createRoute(cid)) },
                 onAddPaymentClick = { cid -> navController.navigate(Screen.AddPayment.createRoute(cid)) },
-                onPaymentClick = { pid -> navController.navigate(Screen.PaymentDetail.createRoute(pid)) }
+                onPaymentClick = { pid -> navController.navigate(Screen.PaymentDetail.createRoute(pid)) },
+                onBudgetClick = { pid -> navController.navigate(Screen.RepairBudgetList.route) },
+                onAddExpenseClick = { pid -> navController.navigate(Screen.AddExpense.createRoute(pid)) },
+                onAddConditionClick = { pid, cid, type -> navController.navigate(Screen.AddPropertyCondition.createRoute(pid, cid, type)) },
+                onViewPhotos = { uris, index -> navController.navigate(Screen.PhotoViewer.createRoute(uris, index)) }
             )
         }
 
@@ -165,7 +193,6 @@ fun RentAppNavGraph(navController: NavHostController) {
                 contractRepo = contractRepo,
                 onBack = { navController.popBackStack() },
                 onSuccess = { 
-                    // Go back to property detail
                     navController.popBackStack(Screen.PropertyDetail.createRoute(propertyId), inclusive = false)
                 }
             )
@@ -206,7 +233,8 @@ fun RentAppNavGraph(navController: NavHostController) {
                 contractRepo = contractRepo,
                 onBack = { navController.popBackStack() },
                 onEdit = { navController.navigate(Screen.EditTenant.createRoute(tenantId)) },
-                onContractClick = { cid -> navController.navigate(Screen.ContractDetail.createRoute(cid)) }
+                onContractClick = { cid -> navController.navigate(Screen.ContractDetail.createRoute(cid)) },
+                onViewPhotos = { uris, index -> navController.navigate(Screen.PhotoViewer.createRoute(uris, index)) }
             )
         }
 
@@ -262,6 +290,7 @@ fun RentAppNavGraph(navController: NavHostController) {
             PaymentDetailScreen(
                 paymentId = paymentId,
                 viewModel = paymentViewModel,
+                userViewModel = userViewModel,
                 contractRepo = contractRepo,
                 propertyRepo = propertyRepo,
                 tenantRepo = tenantRepo,
@@ -308,6 +337,7 @@ fun RentAppNavGraph(navController: NavHostController) {
                 viewModel = paymentViewModel,
                 propertyViewModel = propertyViewModel,
                 contractViewModel = contractViewModel,
+                repairBudgetViewModel = repairBudgetViewModel,
                 navController = navController,
                 onBack = { navController.popBackStack() }
             )
@@ -324,9 +354,12 @@ fun RentAppNavGraph(navController: NavHostController) {
                 propertyRepo = propertyRepo,
                 tenantRepo = tenantRepo,
                 paymentRepo = paymentRepo,
+                conditionRepo = propertyConditionRepo,
                 onBack = { navController.popBackStack() },
                 onAddPayment = { cid -> navController.navigate(Screen.AddPayment.createRoute(cid)) },
-                onViewPayments = { /* Could navigate to a filtered payment list if needed */ }
+                onViewPayments = { },
+                onAddCondition = { pid, cid, type -> navController.navigate(Screen.AddPropertyCondition.createRoute(pid, cid, type)) },
+                onViewPhotos = { uris, index -> navController.navigate(Screen.PhotoViewer.createRoute(uris, index)) }
             )
         }
 
@@ -340,6 +373,106 @@ fun RentAppNavGraph(navController: NavHostController) {
                         popUpTo(0) { inclusive = true }
                     }
                 }
+            )
+        }
+
+        composable(Screen.RepairBudgetList.route) {
+            RepairBudgetListScreen(
+                viewModel = repairBudgetViewModel,
+                paymentViewModel = paymentViewModel,
+                onBack = { navController.popBackStack() },
+                onAddBudget = { navController.navigate(Screen.AddRepairBudget.createRoute(-1L)) },
+                onEditBudget = { propertyId, budgetId -> 
+                    navController.navigate(Screen.AddRepairBudget.createRoute(propertyId) + "?budgetId=$budgetId")
+                }
+            )
+        }
+
+        composable(
+            Screen.AddRepairBudget.route + "?budgetId={budgetId}",
+            arguments = listOf(
+                navArgument("propertyId") { type = NavType.LongType },
+                navArgument("budgetId") { type = NavType.LongType; defaultValue = -1L }
+            )
+        ) { backStackEntry ->
+            val propertyId = backStackEntry.arguments?.getLong("propertyId")?.takeIf { it != -1L }
+            val budgetId = backStackEntry.arguments?.getLong("budgetId")?.takeIf { it != -1L }
+            AddRepairBudgetScreen(
+                viewModel = repairBudgetViewModel,
+                propertyViewModel = propertyViewModel,
+                propertyId = propertyId,
+                editBudgetId = budgetId,
+                onBack = { navController.popBackStack() },
+                onSuccess = { navController.popBackStack() }
+            )
+        }
+
+        composable(
+            Screen.AddExpense.route,
+            arguments = listOf(navArgument("propertyId") { type = NavType.LongType })
+        ) { backStackEntry ->
+            val propertyId = backStackEntry.arguments?.getLong("propertyId") ?: return@composable
+            AddExpenseScreen(
+                propertyId = propertyId,
+                viewModel = expenseViewModel,
+                onBack = { navController.popBackStack() },
+                onSuccess = { navController.popBackStack() }
+            )
+        }
+
+        composable(Screen.ExpenseList.route) {
+            ExpenseListScreen(
+                viewModel = expenseViewModel,
+                navController = navController,
+                onBack = { navController.popBackStack() },
+                onAddExpense = { 
+                    // Si queremos agregar un gasto general, podemos necesitar una propiedad por defecto o dejar que el usuario elija.
+                    // Por ahora, asumimos que se navega desde una propiedad. Si se navega desde la lista general,
+                    // podríamos redirigir a la lista de propiedades para seleccionar una.
+                    navController.navigate(Screen.PropertyList.route)
+                }
+            )
+        }
+
+        composable(
+            Screen.AddPropertyCondition.route,
+            arguments = listOf(
+                navArgument("propertyId") { type = NavType.LongType },
+                navArgument("contractId") { type = NavType.LongType; defaultValue = -1L },
+                navArgument("type") { type = NavType.StringType; defaultValue = "CHECK_IN" }
+            )
+        ) { backStackEntry ->
+            val propertyId = backStackEntry.arguments?.getLong("propertyId") ?: return@composable
+            val contractId = backStackEntry.arguments?.getLong("contractId").takeIf { it != -1L }
+            val type = backStackEntry.arguments?.getString("type") ?: "CHECK_IN"
+            AddPropertyConditionScreen(
+                propertyId = propertyId,
+                contractId = contractId,
+                initialType = type,
+                viewModel = propertyConditionViewModel,
+                onBack = { navController.popBackStack() },
+                onSuccess = { navController.popBackStack() },
+                onViewPhotos = { uris, index ->
+                    navController.navigate(Screen.PhotoViewer.createRoute(uris, index))
+                }
+            )
+        }
+
+        composable(
+            Screen.PhotoViewer.route,
+            arguments = listOf(
+                navArgument("uris") { type = NavType.StringType },
+                navArgument("initialIndex") { type = NavType.IntType; defaultValue = 0 }
+            )
+        ) { backStackEntry ->
+            val urisEncoded = backStackEntry.arguments?.getString("uris") ?: ""
+            val uris = java.net.URLDecoder.decode(urisEncoded, "UTF-8").split(",").filter { it.isNotBlank() }
+            val initialIndex = backStackEntry.arguments?.getInt("initialIndex") ?: 0
+            
+            PhotoViewerScreen(
+                uris = uris,
+                initialIndex = initialIndex,
+                onBack = { navController.popBackStack() }
             )
         }
     }

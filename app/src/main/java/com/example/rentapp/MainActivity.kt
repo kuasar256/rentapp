@@ -27,8 +27,18 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.FirebaseFirestoreSettings
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
+import android.content.Context
+
+import com.example.rentapp.ui.components.locale.LocaleManager
+import java.util.Locale
 
 class MainActivity : FragmentActivity() { // Use FragmentActivity for BiometricPrompt
+    override fun attachBaseContext(newBase: Context) {
+        val lang = runBlocking { PreferencesManager.getLanguageFlow(newBase).first() }
+        super.attachBaseContext(LocaleManager.updateResources(newBase, lang))
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         Log.d("RentAppDebug", "MainActivity.onCreate called")
@@ -44,13 +54,13 @@ class MainActivity : FragmentActivity() { // Use FragmentActivity for BiometricP
             )
             Log.d("RentAppDebug", "WorkManager task enqueued successfully")
 
-            // Setup SyncWorker (Background sync every 4 hours)
-            val syncWorkRequest = PeriodicWorkRequestBuilder<com.example.rentapp.worker.SyncWorker>(4, TimeUnit.HOURS)
+            // Setup Payment Generator Worker (Check every 12 hours)
+            val generatorWorkRequest = PeriodicWorkRequestBuilder<com.example.rentapp.worker.AutoPaymentGeneratorWorker>(12, TimeUnit.HOURS)
                 .build()
             WorkManager.getInstance(applicationContext).enqueueUniquePeriodicWork(
-                "SyncWorker",
+                "AutoPaymentGeneratorWorker",
                 ExistingPeriodicWorkPolicy.KEEP,
-                syncWorkRequest
+                generatorWorkRequest
             )
         } catch (e: Exception) {
             Log.e("RentAppDebug", "Error setting up WorkManager: ${e.message}")

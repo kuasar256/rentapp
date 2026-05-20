@@ -43,4 +43,23 @@ sealed class Screen(val route: String) {
     object DelinquencyAlerts : Screen("delinquency_alerts")
     object AnnualReports : Screen("annual_reports")
     object UserProfile : Screen("user_profile")
+    object Onboarding : Screen("onboarding")
+    object RepairBudgetList : Screen("repair_budget_list")
+    object AddRepairBudget : Screen("add_repair_budget/{propertyId}") {
+        fun createRoute(propertyId: Long) = "add_repair_budget/$propertyId"
+    }
+    object ExpenseList : Screen("expense_list")
+    object AddExpense : Screen("add_expense/{propertyId}") {
+        fun createRoute(propertyId: Long) = "add_expense/$propertyId"
+    }
+    object AddPropertyCondition : Screen("add_property_condition/{propertyId}?contractId={contractId}&type={type}") {
+        fun createRoute(propertyId: Long, contractId: Long? = null, type: String = "CHECK_IN") =
+            "add_property_condition/$propertyId?contractId=${contractId ?: -1L}&type=$type"
+    }
+    object PhotoViewer : Screen("photo_viewer?uris={uris}&initialIndex={initialIndex}") {
+        fun createRoute(uris: List<String>, initialIndex: Int = 0): String {
+            val urisEncoded = java.net.URLEncoder.encode(uris.joinToString(","), "UTF-8")
+            return "photo_viewer?uris=$urisEncoded&initialIndex=$initialIndex"
+        }
+    }
 }

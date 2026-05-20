@@ -8,6 +8,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -27,12 +28,16 @@ import com.example.rentapp.R
 import com.example.rentapp.data.local.entity.Contract
 import com.example.rentapp.data.local.entity.Payment
 import com.example.rentapp.data.local.entity.Property
+import com.example.rentapp.data.local.entity.PropertyCondition
 import com.example.rentapp.data.local.entity.Tenant
 import com.example.rentapp.data.repository.ContractRepository
 import com.example.rentapp.data.repository.PaymentRepository
+import com.example.rentapp.data.repository.PropertyConditionRepository
 import com.example.rentapp.data.repository.PropertyRepository
 import com.example.rentapp.data.repository.TenantRepository
 import com.example.rentapp.ui.theme.*
+import com.example.rentapp.ui.components.DocumentGallery
+import com.example.rentapp.util.PdfHelper
 import java.text.NumberFormat
 import java.text.SimpleDateFormat
 import java.util.*
@@ -45,15 +50,19 @@ fun ContractDetailScreen(
     propertyRepo: PropertyRepository,
     tenantRepo: TenantRepository,
     paymentRepo: PaymentRepository,
+    conditionRepo: PropertyConditionRepository,
     onBack: () -> Unit,
     onAddPayment: (Long) -> Unit,
-    onViewPayments: () -> Unit = {}
+    onViewPayments: () -> Unit = {},
+    onAddCondition: (Long, Long, String) -> Unit = { _, _, _ -> },
+    onViewPhotos: (List<String>, Int) -> Unit = { _, _ -> }
 ) {
     val context = LocalContext.current
     var contract by remember { mutableStateOf<Contract?>(null) }
     var property by remember { mutableStateOf<Property?>(null) }
     var tenant by remember { mutableStateOf<Tenant?>(null) }
     var payments by remember { mutableStateOf<List<Payment>>(emptyList()) }
+    var conditions by remember { mutableStateOf<List<PropertyCondition>>(emptyList()) }
     var isLoading by remember { mutableStateOf(true) }
 
     val currentCurrency by com.example.rentapp.data.preferences.PreferencesManager
@@ -91,6 +100,12 @@ fun ContractDetailScreen(
         }
     }
 
+    LaunchedEffect(contractId) {
+        conditionRepo.getConditionsByContract(contractId).collect {
+            conditions = it.sortedByDescending { c -> c.date }
+        }
+    }
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -103,12 +118,22 @@ fun ContractDetailScreen(
                 },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = stringResource(R.string.back), tint = Primary)
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.back), tint = Primary)
                     }
                 },
                 actions = {
-                    IconButton(onClick = { /* Share/PDF - future implementation */ }) {
-                        Icon(Icons.Default.Share, contentDescription = "Compartir", tint = Primary)
+                    IconButton(onClick = {
+                        contract?.let { c ->
+                            PdfHelper.generateContractReceipt(
+                                context = context,
+                                contract = c,
+                                property = property,
+                                tenant = tenant,
+                                currency = currentCurrency
+                            )
+                        }
+                    }) {
+                        Icon(Icons.Default.PictureAsPdf, contentDescription = "Exportar PDF", tint = Primary)
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(containerColor = Background)
@@ -147,6 +172,7 @@ fun ContractDetailScreen(
         }
 
         val c = contract!!
+        val currencyIcon = if (currentCurrency == "BOB") Icons.Default.Payments else Icons.Default.AttachMoney
 
         LazyColumn(
             modifier = Modifier.fillMaxSize().padding(padding),
@@ -202,7 +228,7 @@ fun ContractDetailScreen(
                             FinancialLineItem(
                                 label = "Pago Inquilino",
                                 value = formatter.format(c.monthlyRent),
-                                icon = Icons.Default.Payments,
+                                icon = currencyIcon,
                                 highlight = true
                             )
                             HorizontalDivider(modifier = Modifier.padding(vertical = 12.dp), color = OutlineVariant.copy(0.2f))
@@ -211,16 +237,16 @@ fun ContractDetailScreen(
                                 horizontalArrangement = Arrangement.SpaceBetween,
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
-                                Column {
+                                Column(modifier = Modifier.weight(1f)) {
                                     Text("Distribución (Modelo Mediador)", style = MaterialTheme.typography.labelMedium, color = Primary, fontWeight = FontWeight.Bold)
                                     Spacer(Modifier.height(4.dp))
                                     Text("• Pago a propietario (98%)", style = MaterialTheme.typography.bodySmall, color = OnSurfaceVariant)
                                     Text("• Comisión RentApp (2%)", style = MaterialTheme.typography.bodySmall, color = OnSurfaceVariant)
                                 }
-                                Column(horizontalAlignment = Alignment.End) {
+                                Column(horizontalAlignment = Alignment.End, modifier = Modifier.padding(start = 8.dp)) {
                                     Spacer(Modifier.height(20.dp))
-                                    Text(formatter.format(c.monthlyRent * 0.98), style = MaterialTheme.typography.bodySmall, color = OnBackground, fontWeight = FontWeight.SemiBold)
-                                    Text(formatter.format(c.monthlyRent * 0.02), style = MaterialTheme.typography.bodySmall, color = OnBackground, fontWeight = FontWeight.SemiBold)
+                                    Text(formatter.format(c.monthlyRent * 0.98), style = MaterialTheme.typography.bodySmall, color = OnBackground, fontWeight = FontWeight.SemiBold, textAlign = TextAlign.End)
+                                    Text(formatter.format(c.monthlyRent * 0.02), style = MaterialTheme.typography.bodySmall, color = OnBackground, fontWeight = FontWeight.SemiBold, textAlign = TextAlign.End)
                                 }
                             }
                             HorizontalDivider(modifier = Modifier.padding(vertical = 12.dp), color = OutlineVariant.copy(0.2f))
@@ -340,6 +366,19 @@ fun ContractDetailScreen(
                                     Text("Garantía: ${c.guarantorProperty}", style = MaterialTheme.typography.bodySmall, color = OnSurfaceVariant)
                                 }
                             }
+
+                            // Document Gallery
+                            val uris = c.documentImageUris.split(",").filter { it.isNotBlank() }
+                            if (uris.isNotEmpty()) {
+                                HorizontalDivider(modifier = Modifier.padding(vertical = 12.dp), color = OutlineVariant.copy(0.2f))
+                                Text("DOCUMENTOS DEL CONTRATO", style = MaterialTheme.typography.labelSmall, color = Primary, fontWeight = FontWeight.Bold)
+                                Spacer(Modifier.height(8.dp))
+                                DocumentGallery(
+                                    uris = uris,
+                                    onAddClick = null,
+                                    onImageClick = { index -> onViewPhotos(uris, index) }
+                                )
+                            }
                         }
                     }
                 }
@@ -394,8 +433,126 @@ fun ContractDetailScreen(
                 PaymentHistoryItem(payment = payment, formatter = formatter, dateFormat = dateFormatShort)
             }
 
+            // ── Property Conditions ──────────────────────────────────────────
+            item {
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        SectionTitle(icon = Icons.Default.CameraAlt, title = stringResource(R.string.property_condition))
+                        if (c.status == "ACTIVE") {
+                            TextButton(onClick = { onAddCondition(c.propertyId, c.id, "CHECK_IN") }) {
+                                Icon(Icons.Default.Add, contentDescription = null, modifier = Modifier.size(16.dp))
+                                Spacer(Modifier.width(4.dp))
+                                Text(stringResource(R.string.add), fontSize = 12.sp)
+                            }
+                        }
+                    }
+                    if (conditions.isEmpty()) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .background(SurfaceContainer, RoundedCornerShape(16.dp))
+                                .padding(24.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(
+                                stringResource(R.string.no_conditions_msg),
+                                color = OnSurfaceVariant,
+                                style = MaterialTheme.typography.bodyMedium,
+                                textAlign = TextAlign.Center
+                            )
+                        }
+                    }
+                }
+            }
+
+            items(conditions) { condition ->
+                ConditionHistoryItem(
+                    condition = condition,
+                    dateFormat = dateFormatShort,
+                    onViewPhotos = onViewPhotos
+                )
+            }
+
             // Bottom padding for FAB
             item { Spacer(Modifier.height(80.dp)) }
+        }
+    }
+}
+
+@Composable
+private fun ConditionHistoryItem(
+    condition: PropertyCondition,
+    dateFormat: SimpleDateFormat,
+    onViewPhotos: (List<String>, Int) -> Unit
+) {
+    val isCheckIn = condition.type == "CHECK_IN"
+    val accentColor = if (isCheckIn) Primary else Tertiary
+
+    Card(
+        colors = CardDefaults.cardColors(containerColor = SurfaceContainer),
+        shape = RoundedCornerShape(16.dp),
+        modifier = Modifier
+            .fillMaxWidth()
+            .border(1.dp, accentColor.copy(0.1f), RoundedCornerShape(16.dp))
+    ) {
+        Column(modifier = Modifier.padding(16.dp)) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Box(
+                    modifier = Modifier
+                        .size(40.dp)
+                        .clip(CircleShape)
+                        .background(accentColor.copy(0.1f)),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        if (isCheckIn) Icons.Default.Login else Icons.Default.Logout,
+                        contentDescription = null,
+                        tint = accentColor,
+                        modifier = Modifier.size(20.dp)
+                    )
+                }
+                Spacer(Modifier.width(12.dp))
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        if (isCheckIn) stringResource(R.string.check_in) else stringResource(R.string.check_out),
+                        style = MaterialTheme.typography.titleSmall,
+                        fontWeight = FontWeight.Bold,
+                        color = OnBackground
+                    )
+                    Text(
+                        dateFormat.format(condition.date),
+                        style = MaterialTheme.typography.labelSmall,
+                        color = OnSurfaceVariant
+                    )
+                }
+            }
+            if (condition.notes.isNotBlank()) {
+                Spacer(Modifier.height(8.dp))
+                Text(
+                    condition.notes,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = OnBackground,
+                    maxLines = 3
+                )
+            }
+            
+            val photos = condition.imageUris.split(",").filter { it.isNotBlank() }
+            if (photos.isNotEmpty()) {
+                Spacer(Modifier.height(8.dp))
+                TextButton(
+                    onClick = { onViewPhotos(photos, 0) },
+                    contentPadding = PaddingValues(0.dp),
+                    modifier = Modifier.height(32.dp)
+                ) {
+                    Icon(Icons.Default.PhotoLibrary, contentDescription = null, modifier = Modifier.size(16.dp))
+                    Spacer(Modifier.width(6.dp))
+                    Text(stringResource(R.string.view_photos, photos.size), fontSize = 12.sp)
+                }
+            }
         }
     }
 }

@@ -21,6 +21,7 @@ data class Tenant(
     val monthlyRentDueDate: Int = 1, // Día del mes (1-31) cuando vence el pago del alquiler
     val photoUrl: String = "",
     val status: String = "ACTIVE", // "ACTIVE", "INACTIVE"
+    val documentImageUris: String = "", // Comma-separated list of local URIs
     val createdAt: Long = System.currentTimeMillis(),
     val updatedAt: Long = System.currentTimeMillis(),
     val remoteId: String? = null

@@ -1,6 +1,8 @@
 package com.example.rentapp.ui.screens.tenant
 
 import android.net.Uri
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -9,6 +11,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -27,6 +30,8 @@ import com.example.rentapp.ui.screens.auth.NeonTextField
 import com.example.rentapp.ui.screens.property.SectionLabel
 import com.example.rentapp.ui.theme.*
 import com.example.rentapp.ui.components.ImagePickerField
+import com.example.rentapp.ui.components.DocumentGallery
+import com.example.rentapp.ui.components.persistImageLocally
 import com.example.rentapp.viewmodel.TenantViewModel
 import kotlinx.coroutines.launch
 import java.util.Calendar
@@ -41,7 +46,6 @@ fun AddTenantScreen(
     onSuccess: (Long?) -> Unit
 ) {
     var firstName by remember { mutableStateOf("") }
-    // ... rest of variables remain the same ...
     var lastName by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
     var phone by remember { mutableStateOf("") }
@@ -52,8 +56,15 @@ fun AddTenantScreen(
     var emergencyPhone by remember { mutableStateOf("") }
     var monthlyRentDueDate by remember { mutableStateOf("") }
     var photoUri by remember { mutableStateOf<String?>(null) }
+    var documentImageUris by remember { mutableStateOf<List<String>>(emptyList()) }
     var existingTenant by remember { mutableStateOf<Tenant?>(null) }
     var isSaving by remember { mutableStateOf(false) }
+
+    // Validation States
+    var firstNameError by remember { mutableStateOf<String?>(null) }
+    var lastNameError by remember { mutableStateOf<String?>(null) }
+    var emailError by remember { mutableStateOf<String?>(null) }
+    var documentIdError by remember { mutableStateOf<String?>(null) }
     
     var showDatePicker by remember { mutableStateOf(false) }
     val datePickerState = rememberDatePickerState()
@@ -84,6 +95,7 @@ fun AddTenantScreen(
                 if (t.photoUrl.isNotBlank()) {
                     photoUri = t.photoUrl
                 }
+                documentImageUris = t.documentImageUris.split(",").filter { it.isNotBlank() }
             }
         }
     }
@@ -103,7 +115,7 @@ fun AddTenantScreen(
                 },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = stringResource(R.string.back), tint = Primary)
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.back), tint = Primary)
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(containerColor = Background)
@@ -117,27 +129,53 @@ fun AddTenantScreen(
                 .padding(paddingValues)
                 .padding(horizontal = 24.dp)
                 .verticalScroll(rememberScrollState()),
-            verticalArrangement = Arrangement.spacedBy(14.dp)
+            verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             Spacer(Modifier.height(8.dp))
 
             SectionLabel(stringResource(R.string.personal_data))
+            Spacer(Modifier.height(4.dp))
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                 NeonTextField(
-                    value = firstName, onValueChange = { firstName = it }, label = stringResource(R.string.first_name),
-                    leadingIcon = Icons.Default.Person, modifier = Modifier.weight(1f)
+                    value = firstName,
+                    onValueChange = { 
+                        firstName = it
+                        if (it.isNotBlank()) firstNameError = null
+                    },
+                    label = stringResource(R.string.first_name),
+                    leadingIcon = Icons.Default.Person,
+                    modifier = Modifier.weight(1f),
+                    isError = firstNameError != null,
+                    supportingText = firstNameError?.let { { Text(it, color = MaterialTheme.colorScheme.error) } }
                 )
                 NeonTextField(
-                    value = lastName, onValueChange = { lastName = it }, label = stringResource(R.string.last_name),
-                    leadingIcon = Icons.Default.Person, modifier = Modifier.weight(1f)
+                    value = lastName,
+                    onValueChange = { 
+                        lastName = it
+                        if (it.isNotBlank()) lastNameError = null
+                    },
+                    label = stringResource(R.string.last_name),
+                    leadingIcon = Icons.Default.Person,
+                    modifier = Modifier.weight(1f),
+                    isError = lastNameError != null,
+                    supportingText = lastNameError?.let { { Text(it, color = MaterialTheme.colorScheme.error) } }
                 )
             }
             
             val currentCurrency by com.example.rentapp.data.preferences.PreferencesManager.getCurrencyFlow(context).collectAsState(initial = "USD")
+            val currencyIcon = if (currentCurrency == "BOB") Icons.Default.Payments else Icons.Default.AttachMoney
             
             NeonTextField(
-                value = email, onValueChange = { email = it }, label = stringResource(R.string.email_label),
-                leadingIcon = Icons.Default.Email, keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email)
+                value = email,
+                onValueChange = { 
+                    email = it
+                    if (it.isNotBlank()) emailError = null
+                },
+                label = stringResource(R.string.email_label),
+                leadingIcon = Icons.Default.Email,
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
+                isError = emailError != null,
+                supportingText = emailError?.let { { Text(it, color = MaterialTheme.colorScheme.error) } }
             )
             NeonTextField(
                 value = phone, onValueChange = { phone = it }, label = stringResource(R.string.phone_label),
@@ -150,13 +188,21 @@ fun AddTenantScreen(
             NeonTextField(
                 value = monthlyIncome, onValueChange = { monthlyIncome = it }, 
                 label = stringResource(R.string.monthly_income, currentCurrency.uppercase()),
-                leadingIcon = Icons.Default.AttachMoney, keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal)
+                leadingIcon = currencyIcon, keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal)
             )
 
             SectionLabel(stringResource(R.string.identification))
+            Spacer(Modifier.height(4.dp))
             NeonTextField(
-                value = documentId, onValueChange = { documentId = it }, label = stringResource(R.string.id_number),
-                leadingIcon = Icons.Default.Badge
+                value = documentId,
+                onValueChange = { 
+                    documentId = it
+                    if (it.isNotBlank()) documentIdError = null
+                },
+                label = stringResource(R.string.id_number),
+                leadingIcon = Icons.Default.Badge,
+                isError = documentIdError != null,
+                supportingText = documentIdError?.let { { Text(it, color = MaterialTheme.colorScheme.error) } }
             )
                 
             ExposedDropdownMenuBox(expanded = nationalityExpanded, onExpandedChange = { nationalityExpanded = it }) {
@@ -165,7 +211,7 @@ fun AddTenantScreen(
                     label = { Text(stringResource(R.string.nationality_label), color = OnSurfaceVariant) },
                     leadingIcon = { Icon(Icons.Default.Public, contentDescription = null, tint = OnSurfaceVariant) },
                     trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = nationalityExpanded) },
-                    modifier = Modifier.fillMaxWidth().menuAnchor(),
+                    modifier = Modifier.fillMaxWidth().menuAnchor(MenuAnchorType.PrimaryNotEditable),
                     colors = OutlinedTextFieldDefaults.colors(
                         focusedTextColor = OnBackground, unfocusedTextColor = OnBackground,
                         focusedBorderColor = Primary, unfocusedBorderColor = OutlineVariant,
@@ -186,6 +232,7 @@ fun AddTenantScreen(
             }
 
             SectionLabel(stringResource(R.string.emergency_contact))
+            Spacer(Modifier.height(4.dp))
             NeonTextField(
                 value = emergencyContact, onValueChange = { emergencyContact = it }, label = stringResource(R.string.emergency_contact_name),
                 leadingIcon = Icons.Default.PersonPin
@@ -196,6 +243,7 @@ fun AddTenantScreen(
             )
 
             SectionLabel(stringResource(R.string.rental_info))
+            Spacer(Modifier.height(4.dp))
             
             if (showDatePicker) {
                 DatePickerDialog(
@@ -235,13 +283,31 @@ fun AddTenantScreen(
             )
             
             SectionLabel(stringResource(R.string.tenant_photo))
+            Spacer(Modifier.height(4.dp))
             ImagePickerField(
                 label = stringResource(R.string.tap_to_add_photo),
                 imageUri = photoUri,
                 onImageSelected = { photoUri = it }
             )
 
-            Spacer(Modifier.height(16.dp))
+            SectionLabel("Documentos de Identidad (Fotos)")
+            Spacer(Modifier.height(4.dp))
+            val multiImageLauncher = rememberLauncherForActivityResult(
+                contract = ActivityResultContracts.GetMultipleContents()
+            ) { uris: List<Uri> ->
+                val localPaths = uris.mapNotNull { persistImageLocally(context, it) }
+                documentImageUris = documentImageUris + localPaths
+            }
+            
+            DocumentGallery(
+                uris = documentImageUris,
+                onAddClick = { multiImageLauncher.launch("image/*") },
+                onImageClick = { index -> 
+                    // Optional: View full screen even in edit mode
+                }
+            )
+
+            Spacer(Modifier.height(24.dp))
             
             Box(
                 modifier = Modifier
@@ -250,33 +316,58 @@ fun AddTenantScreen(
                     .clip(RoundedCornerShape(12.dp))
                     .background(
                         Brush.horizontalGradient(listOf(NeonGradientStart, NeonGradientEnd)),
-                        alpha = if (isSaving || firstName.isBlank() || lastName.isBlank() || email.isBlank()) 0.5f else 1f
+                        alpha = if (isSaving) 0.5f else 1f
                     )
-                    .clickable(enabled = !isSaving && firstName.isNotBlank() && lastName.isNotBlank() && email.isNotBlank()) {
-                        isSaving = true
-                        scope.launch {
-                            val tenant = (existingTenant ?: Tenant()).copy(
-                                firstName = firstName, lastName = lastName,
-                                email = email, phone = phone,
-                                documentId = documentId,
-                                nationality = nationality,
-                                occupation = occupation,
-                                monthlyIncome = monthlyIncome.toDoubleOrNull() ?: 0.0,
-                                emergencyContact = emergencyContact, emergencyPhone = emergencyPhone,
-                                monthlyRentDueDate = monthlyRentDueDate.toIntOrNull() ?: 1,
-                                photoUrl = photoUri ?: ""
-                            )
-                            
-                            var savedId: Long? = null
-                            if (editTenantId == null) {
-                                savedId = viewModel.insertTenantAndGetId(tenant)
-                            } else {
-                                viewModel.updateTenant(tenant)
-                                savedId = editTenantId
+                    .clickable(enabled = !isSaving) {
+                        // Validate before saving
+                        var hasError = false
+                        if (firstName.isBlank()) {
+                            firstNameError = context.resources.getString(R.string.error_field_required)
+                            hasError = true
+                        }
+                        if (lastName.isBlank()) {
+                            lastNameError = context.resources.getString(R.string.error_field_required)
+                            hasError = true
+                        }
+                        if (email.isBlank()) {
+                            emailError = context.resources.getString(R.string.error_field_required)
+                            hasError = true
+                        }
+                        if (documentId.isBlank()) {
+                            documentIdError = context.resources.getString(R.string.error_field_required)
+                            hasError = true
+                        }
+
+                        if (!hasError) {
+                            isSaving = true
+                            scope.launch {
+                                val tenant = (existingTenant ?: Tenant()).copy(
+                                    firstName = firstName.trim(),
+                                    lastName = lastName.trim(),
+                                    email = email.trim(),
+                                    phone = phone.trim(),
+                                    documentId = documentId.trim(),
+                                    nationality = nationality,
+                                    occupation = occupation,
+                                    monthlyIncome = monthlyIncome.toDoubleOrNull() ?: 0.0,
+                                    emergencyContact = emergencyContact,
+                                    emergencyPhone = emergencyPhone,
+                                    monthlyRentDueDate = monthlyRentDueDate.toIntOrNull() ?: 1,
+                                    photoUrl = photoUri ?: "",
+                                    documentImageUris = documentImageUris.joinToString(",")
+                                )
+                                
+                                var savedId: Long? = null
+                                if (editTenantId == null) {
+                                    savedId = viewModel.insertTenantAndGetId(tenant)
+                                } else {
+                                    viewModel.updateTenant(tenant)
+                                    savedId = editTenantId
+                                }
+                                
+                                kotlinx.coroutines.delay(500)
+                                onSuccess(savedId)
                             }
-                            
-                            kotlinx.coroutines.delay(500)
-                            onSuccess(savedId)
                         }
                     },
                 contentAlignment = Alignment.Center

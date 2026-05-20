@@ -10,7 +10,9 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.rentapp.R
 import com.example.rentapp.data.local.AppDatabase
 import com.example.rentapp.data.repository.UserRepository
 import com.example.rentapp.sync.FirestoreSyncManager
@@ -33,16 +35,10 @@ fun RentAppBottomBar(navController: NavHostController) {
     
     val onNavigate: (String) -> Unit = { route ->
         navController.navigate(route) {
-            // Pop up to the start destination of the graph to
-            // avoid building up a large stack of destinations
-            // on the back stack as users select items
             popUpTo(navController.graph.findStartDestination().id) {
-                // saveState = true // Comentado si causa problemas de acceso
+                // saveState = true
             }
-            // Avoid multiple copies of the same destination when
-            // reselecting the same item
             launchSingleTop = true
-            // Restore state when reselecting a previously selected item
             restoreState = true
         }
     }
@@ -52,7 +48,7 @@ fun RentAppBottomBar(navController: NavHostController) {
             selected = currentRoute == Screen.Dashboard.route,
             onClick = { onNavigate(Screen.Dashboard.route) },
             icon = { Icon(Icons.Default.Home, contentDescription = null) },
-            label = { Text("Inicio") },
+            label = { Text(stringResource(R.string.home)) },
             colors = NavigationBarItemDefaults.colors(
                 selectedIconColor = OnPrimaryFixed,
                 indicatorColor = Primary,
@@ -65,7 +61,7 @@ fun RentAppBottomBar(navController: NavHostController) {
                 selected = currentRoute == Screen.PropertyList.route,
                 onClick = { onNavigate(Screen.PropertyList.route) },
                 icon = { Icon(Icons.Default.Domain, contentDescription = null) },
-                label = { Text("Propiedades") },
+                label = { Text(stringResource(R.string.properties)) },
                 colors = NavigationBarItemDefaults.colors(
                     selectedIconColor = OnPrimaryFixed,
                     indicatorColor = Primary,
@@ -78,7 +74,7 @@ fun RentAppBottomBar(navController: NavHostController) {
                 selected = currentRoute == Screen.TenantList.route,
                 onClick = { onNavigate(Screen.TenantList.route) },
                 icon = { Icon(Icons.Default.People, contentDescription = null) },
-                label = { Text("Inquilinos") },
+                label = { Text(stringResource(R.string.tenants)) },
                 colors = NavigationBarItemDefaults.colors(
                     selectedIconColor = OnPrimaryFixed,
                     indicatorColor = Primary,
@@ -92,7 +88,7 @@ fun RentAppBottomBar(navController: NavHostController) {
             selected = currentRoute == Screen.PaymentList.route,
             onClick = { onNavigate(Screen.PaymentList.route) },
             icon = { Icon(Icons.Default.Payments, contentDescription = null) },
-            label = { Text("Pagos") },
+            label = { Text(stringResource(R.string.payments)) },
             colors = NavigationBarItemDefaults.colors(
                 selectedIconColor = OnPrimaryFixed,
                 indicatorColor = Primary,
@@ -106,7 +102,7 @@ fun RentAppBottomBar(navController: NavHostController) {
                 selected = currentRoute == Screen.AnnualReports.route,
                 onClick = { onNavigate(Screen.AnnualReports.route) },
                 icon = { Icon(Icons.Default.BarChart, contentDescription = null) },
-                label = { Text("Reportes") },
+                label = { Text(stringResource(R.string.reports)) },
                 colors = NavigationBarItemDefaults.colors(
                     selectedIconColor = OnPrimaryFixed,
                     indicatorColor = Primary,

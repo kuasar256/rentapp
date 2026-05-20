@@ -10,6 +10,7 @@
     <string name="email">E-Mail</string>
     <string name="password">Passwort</string>
     <string name="error_fill_all_fields">Bitte füllen Sie alle Felder aus</string>
+    <string name="error_field_required">Dieses Feld ist obligatorisch</string>
     <string name="login_btn">Anmelden</string>
     <string name="no_account">Haben Sie kein Konto? </string>
     <string name="register">Registrieren</string>
@@ -64,4 +65,49 @@
     <string name="delinquency_days_overdue">%1$d Tage Verzug</string>
     <string name="delinquency_mark_paid">Als bezahlt markieren</string>
     <string name="delinquency_total_debt">Gesamtschulden</string>
+    <string name="add">Hinzufügen</string>
+    <string name="add_property">Immobilie hinzufügen</string>
+    <string name="add_tenant">Mieter hinzufügen</string>
+    <string name="all_filter">Alle</string>
+    <string name="available_filter">Verfügbar</string>
+    <string name="rented_filter">Vermietet</string>
+    <string name="maintenance_filter">Instandhaltung</string>
+    <string name="active_filter">Aktiv</string>
+    <string name="inactive_filter">Inaktiv</string>
+    <string name="properties_list_title">Immobilien</string>
+    <string name="tenants_list_title">Mieter</string>
+    <string name="cancel">Abbrechen</string>
+    <string name="search_hint">Suchen…</string>
+    <string name="status_paid">Bezahlt</string>
+    <string name="status_pending">Ausstehend</string>
+    <string name="status_delayed">Verspätet</string>
+    <!-- Property List & Stats -->
+    <string name="empty_properties_available_title">Keine verfügbaren Immobilien</string>
+    <string name="empty_properties_available_desc">Alle Ihre Immobilien sind belegt oder werden gewartet.</string>
+    <string name="empty_properties_rented_title">Keine vermieteten Immobilien</string>
+    <string name="empty_properties_rented_desc">Es scheint, dass Sie noch keine aktiven Mieter haben.</string>
+    <string name="empty_properties_maintenance_title">Alles ist in Ordnung</string>
+    <string name="empty_properties_maintenance_desc">Sie haben derzeit keine Immobilien in der Wartung.</string>
+    <string name="empty_properties_general_desc">Fügen Sie Ihre erste Immobilie hinzu, um Ihre Vermietungen zu verwalten.</string>
+    <string name="beds">Schlafzimmer</string>
+    <string name="baths">Bäder</string>
+    <string name="area_label">Fläche</string>
+    <string name="property_photo_desc">Immobilienfoto</string>
+
+    <string name="total_label">GESAMT</string>
+    <string name="empty_tenants_active_title">Keine aktiven Mieter</string>
+    <string name="empty_tenants_active_desc">Sie haben derzeit keine laufenden Verträge.</string>
+    <string name="empty_tenants_delayed_title">Gute Nachrichten!</string>
+    <string name="empty_tenants_delayed_desc">Sie haben keine Mieter mit Zahlungsverzug.</string>
+    <string name="empty_tenants_paid_title">Keine aktuellen Zahlungen</string>
+    <string name="empty_tenants_paid_desc">Für diesen Filter wurden noch keine Zahlungen registriert.</string>
+    <string name="empty_tenants_general_desc">Fügen Sie die Personen hinzu, die Ihre Immobilien mieten, um den Überblick zu behalten.</string>
+    <string name="not_available_short">N. v.</string>
+
+    <string name="payment_modality">Zahlungsmodalität</string>
+    <string name="contract_type">Vertragstyp</string>
+    <string name="cash">Bargeld</string>
+    <string name="anticretico">Antikretisch</string>
+    <string name="property_rules_label">Hausordnung</string>
+    <string name="property_rules_hint">Z.B. keine Haustiere, keine Partys...</string>
 </resources>

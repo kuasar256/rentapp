@@ -8,6 +8,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -15,6 +16,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
@@ -23,6 +25,7 @@ import androidx.compose.ui.unit.sp
 import com.example.rentapp.R
 import com.example.rentapp.data.local.entity.Payment
 import com.example.rentapp.ui.screens.auth.NeonTextField
+import com.example.rentapp.ui.screens.property.SectionLabel
 import com.example.rentapp.ui.theme.*
 import com.example.rentapp.viewmodel.PaymentViewModel
 import kotlinx.coroutines.launch
@@ -43,13 +46,18 @@ fun AddPaymentScreen(
     var methodDropdownExpanded by remember { mutableStateOf(false) }
 
     // Date Picker
-    var paidDate by remember { mutableStateOf(System.currentTimeMillis()) }
+    var paidDate by remember { mutableLongStateOf(System.currentTimeMillis()) }
     var showDatePicker by remember { mutableStateOf(false) }
     val datePickerState = rememberDatePickerState(initialSelectedDateMillis = paidDate)
 
     var isSaving by remember { mutableStateOf(false) }
     val scope = rememberCoroutineScope()
     
+    val context = LocalContext.current
+    val currentCurrency by com.example.rentapp.data.preferences.PreferencesManager.getCurrencyFlow(context).collectAsState(initial = "USD")
+    
+    val currencyIcon = if (currentCurrency == "BOB") Icons.Default.Payments else Icons.Default.AttachMoney
+
     val dateFormatter = remember { SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()) }
 
     val paymentMethods = listOf("Efectivo", "Transferencia", "Tarjeta", "Cheque")
@@ -60,7 +68,7 @@ fun AddPaymentScreen(
                 title = { Text(stringResource(R.string.add_payment), color = OnBackground, fontWeight = FontWeight.Bold) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = stringResource(R.string.back), tint = Primary)
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.back), tint = Primary)
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(containerColor = Background)
@@ -78,20 +86,15 @@ fun AddPaymentScreen(
         ) {
             Spacer(Modifier.height(8.dp))
 
-            Text(
-                text = stringResource(R.string.details).uppercase(),
-                style = MaterialTheme.typography.labelLarge,
-                color = Primary,
-                fontWeight = FontWeight.ExtraBold,
-                modifier = Modifier.padding(top = 8.dp)
-            )
+            SectionLabel(stringResource(R.string.details))
+            Spacer(Modifier.height(4.dp))
 
             // Amount
             NeonTextField(
                 value = amount,
                 onValueChange = { if (it.isEmpty() || it.all { char -> char.isDigit() || char == '.' }) amount = it },
                 label = stringResource(R.string.payment_amount),
-                leadingIcon = Icons.Default.AttachMoney,
+                leadingIcon = currencyIcon,
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal)
             )
 
@@ -126,7 +129,7 @@ fun AddPaymentScreen(
                     label = { Text(stringResource(R.string.payment_method), color = OnSurfaceVariant) },
                     leadingIcon = { Icon(Icons.Default.CreditCard, contentDescription = null, tint = Primary) },
                     trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = methodDropdownExpanded) },
-                    modifier = Modifier.fillMaxWidth().menuAnchor(),
+                    modifier = Modifier.fillMaxWidth().menuAnchor(MenuAnchorType.PrimaryNotEditable),
                     colors = OutlinedTextFieldDefaults.colors(
                         focusedTextColor = OnBackground, unfocusedTextColor = OnBackground,
                         focusedBorderColor = Primary, unfocusedBorderColor = OutlineVariant,
@@ -152,6 +155,9 @@ fun AddPaymentScreen(
             }
 
             // Notes
+            SectionLabel(stringResource(R.string.reference_notes))
+            Spacer(Modifier.height(4.dp))
+
             OutlinedTextField(
                 value = notes, onValueChange = { notes = it },
                 label = { Text(stringResource(R.string.reference_notes), color = OnSurfaceVariant) },
@@ -202,12 +208,16 @@ fun AddPaymentScreen(
                 if (isSaving) {
                     CircularProgressIndicator(color = OnPrimary, modifier = Modifier.size(24.dp))
                 } else {
-                    Text(
-                        text = stringResource(R.string.register_payment),
-                        color = OnPrimaryFixed,
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 18.sp
-                    )
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Icon(Icons.Default.CheckCircle, contentDescription = null, tint = OnPrimaryFixed, modifier = Modifier.size(22.dp))
+                        Spacer(Modifier.width(10.dp))
+                        Text(
+                            text = stringResource(R.string.register_payment),
+                            color = OnPrimaryFixed,
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 18.sp
+                        )
+                    }
                 }
             }
             Spacer(Modifier.height(32.dp))

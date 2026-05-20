@@ -1,5 +1,6 @@
 package com.example.rentapp.ui.screens.dashboard
 
+import android.util.Log
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
@@ -8,19 +9,18 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
-import android.util.Log
 import androidx.compose.runtime.*
-import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.*
 import androidx.navigation.NavHostController
-import androidx.compose.ui.res.stringResource
 import com.example.rentapp.R
 import com.example.rentapp.ui.navigation.Screen
 import com.example.rentapp.ui.theme.*
@@ -29,8 +29,7 @@ import com.example.rentapp.viewmodel.PaymentViewModel
 import com.example.rentapp.viewmodel.PropertyViewModel
 import com.example.rentapp.viewmodel.TenantViewModel
 import com.example.rentapp.viewmodel.UserViewModel
-import com.example.rentapp.viewmodel.ContractViewModel
-import java.text.NumberFormat
+ import java.text.NumberFormat
 import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -39,19 +38,20 @@ fun DashboardScreen(
     propertyViewModel: PropertyViewModel,
     paymentViewModel: PaymentViewModel,
     tenantViewModel: TenantViewModel,
-    contractViewModel: ContractViewModel,
     userViewModel: UserViewModel,
+    languageViewModel: com.example.rentapp.viewmodel.LanguageViewModel,
     navController: NavHostController
 ) {
+    val context = LocalContext.current
     val userState by userViewModel.user.collectAsState()
     val userName = userState?.name ?: "Usuario"
 
     val greeting = remember {
         val hour = java.util.Calendar.getInstance().get(java.util.Calendar.HOUR_OF_DAY)
         when {
-            hour < 12 -> "¡Buenos días"
-            hour < 19 -> "¡Buenas tardes"
-            else -> "¡Buenas noches"
+            hour < 12 -> R.string.good_morning
+            hour < 19 -> R.string.good_afternoon
+            else -> R.string.good_evening
         }
     }
 
@@ -65,18 +65,26 @@ fun DashboardScreen(
     val delayedPayments by paymentViewModel.delayedPayments.collectAsState()
     val exchangeRates by propertyViewModel.exchangeRates.collectAsState()
     
-    Log.d("RentAppDebug", "DashboardScreen: Composition started")
+    val currentCurrency by languageViewModel.currentCurrency.collectAsState()
     
-    // Remember formatters to avoid re-creation and add safety
-    val currencyUsd = remember { NumberFormat.getCurrencyInstance(Locale("en", "US")) }
-    val currencyBob = remember { 
-        try {
-            NumberFormat.getCurrencyInstance(Locale("es", "BO")).apply { 
-                currency = java.util.Currency.getInstance("BOB") 
+    // Remember formatters based on selected currency
+    val currencyFormatter = remember(currentCurrency) {
+        when (currentCurrency) {
+            "BOB" -> {
+                try {
+                    NumberFormat.getCurrencyInstance(Locale("es", "BO")).apply { 
+                        currency = java.util.Currency.getInstance("BOB") 
+                    }
+                } catch (e: Exception) {
+                    NumberFormat.getCurrencyInstance(Locale("es", "BO"))
+                }
             }
-        } catch (e: Exception) {
-            Log.e("RentAppDebug", "Error initializing currencyBob: ${e.message}")
-            NumberFormat.getCurrencyInstance(Locale("es", "BO")) // Fallback
+            "MXN" -> {
+                NumberFormat.getCurrencyInstance(Locale("es", "MX")).apply { 
+                    currency = java.util.Currency.getInstance("MXN") 
+                }
+            }
+            else -> NumberFormat.getCurrencyInstance(Locale("en", "US"))
         }
     }
 
@@ -96,7 +104,7 @@ fun DashboardScreen(
             TopAppBar(
                 title = {
                     Column {
-                        Text("$greeting, $userName!", color = OnBackground, fontWeight = FontWeight.Black,
+                        Text("${stringResource(greeting)}, $userName!", color = OnBackground, fontWeight = FontWeight.Black,
                             style = MaterialTheme.typography.titleLarge)
                         Text(stringResource(R.string.dashboard_subtitle), color = OnSurfaceVariant,
                             style = MaterialTheme.typography.labelSmall)
@@ -104,10 +112,15 @@ fun DashboardScreen(
                 },
                 actions = {
                     IconButton(
+                        onClick = { navController.navigate(Screen.DelinquencyAlerts.route) }
+                    ) {
+                        Icon(Icons.Default.NotificationsActive, contentDescription = stringResource(R.string.alerts), tint = Primary)
+                    }
+                    IconButton(
                         onClick = { navController.navigate(Screen.UserProfile.route) },
                         modifier = Modifier.background(SurfaceContainer, androidx.compose.foundation.shape.CircleShape)
                     ) {
-                        Icon(Icons.Default.AccountCircle, contentDescription = "Perfil", tint = Primary)
+                        Icon(Icons.Default.AccountCircle, contentDescription = stringResource(R.string.profile), tint = Primary)
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(containerColor = Background)
@@ -169,26 +182,36 @@ fun DashboardScreen(
                                 Spacer(Modifier.height(16.dp))
                                 val baseRevenue = monthlyRevenue ?: 0.0
                                 val bobRate = exchangeRates["BOB"] ?: 6.96
+                                val mxnRate = exchangeRates["MXN"] ?: 17.0
                                 
                                 Text(
-                                    currencyUsd.format(baseRevenue),
+                                    currencyFormatter.format(
+                                        when(currentCurrency) {
+                                            "BOB" -> baseRevenue * bobRate
+                                            "MXN" -> baseRevenue * mxnRate
+                                            else -> baseRevenue
+                                        }
+                                    ),
                                     style = MaterialTheme.typography.displayMedium,
                                     color = OnBackground,
                                     fontWeight = FontWeight.Black
                                 )
                                 
-                                Surface(
-                                    modifier = Modifier.padding(top = 4.dp),
-                                    color = Primary.copy(alpha = 0.1f),
-                                    shape = RoundedCornerShape(8.dp)
-                                ) {
-                                    Text(
-                                        " ≈ ${currencyBob.format(baseRevenue * bobRate)} ",
-                                        style = MaterialTheme.typography.titleMedium,
-                                        color = Primary,
-                                        fontWeight = FontWeight.Bold,
-                                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
-                                    )
+                                if (currentCurrency != "USD") {
+                                    Surface(
+                                        modifier = Modifier.padding(top = 4.dp),
+                                        color = Primary.copy(alpha = 0.1f),
+                                        shape = RoundedCornerShape(8.dp)
+                                    ) {
+                                        val usdFormatter = NumberFormat.getCurrencyInstance(Locale("en", "US"))
+                                        Text(
+                                            " (USD ${usdFormatter.format(baseRevenue)}) ",
+                                            style = MaterialTheme.typography.titleMedium,
+                                            color = Primary,
+                                            fontWeight = FontWeight.Bold,
+                                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
+                                        )
+                                    }
                                 }
                                 
                                 Spacer(Modifier.height(20.dp))
@@ -289,7 +312,10 @@ fun DashboardScreen(
                                     modifier = Modifier.weight(1f), label = stringResource(R.string.add_tenant),
                                     icon = Icons.Default.PersonAdd, onClick = { navController.navigate(Screen.AddTenant.route) }
                                 )
-                                Spacer(modifier = Modifier.weight(1f))
+                                QuickActionButton(
+                                    modifier = Modifier.weight(1f), label = stringResource(R.string.budget_manager),
+                                    icon = Icons.Default.Build, onClick = { navController.navigate(Screen.RepairBudgetList.route) }
+                                )
                             }
                         }
                     }

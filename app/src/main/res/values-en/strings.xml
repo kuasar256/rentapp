@@ -10,11 +10,16 @@
     <string name="email">Email Address</string>
     <string name="password">Password</string>
     <string name="error_fill_all_fields">Please fill in all fields</string>
+    <string name="error_field_required">This field is required</string>
     <string name="login_btn">Sign In</string>
     <string name="no_account">Don\'t have an account? </string>
     <string name="register">Register</string>
     <string name="user_profile">User Profile</string>
+    <string name="profile">Profile</string>
+    <string name="alerts">Alerts</string>
     <string name="logout">Sign Out</string>
+    <string name="home">Home</string>
+    <string name="reports">Reports</string>
     <string name="properties">Properties</string>
     <string name="tenants">Tenants</string>
     <string name="payments">Payments</string>
@@ -34,6 +39,9 @@
     <string name="dashboard_view_reports">View\nReports</string>
     <string name="dashboard_delinquency_alerts">Delinquency Alerts</string>
     <string name="dashboard_overdue_payments_warning">%1$d overdue payments require attention</string>
+    <string name="good_morning">Good morning</string>
+    <string name="good_afternoon">Good afternoon</string>
+    <string name="good_evening">Good evening</string>
 
     <!-- Annual Report -->
     <string name="annual_report_title">Annual Report</string>
@@ -72,4 +80,63 @@
     <!-- Dashboard Status refined -->
     <string name="dashboard_pending">Pending</string>
     <string name="dashboard_paid_this_month">Paid this month</string>
+    <string name="finalize">Finalize</string>
+    <string name="finalize_contract">Finalize Contract</string>
+    <string name="finalize_contract_confirm">Are you sure you want to finalize this contract? The property will become available again.</string>
+    <string name="property_rules">PROPERTY RULES</string>
+    <string name="budget_manager">Budget Management</string>
+    <string name="add_budget">New Budget</string>
+    <string name="repair_description">Repair Description</string>
+    <string name="estimated_cost">Estimated Cost</string>
+    <string name="actual_cost">Actual Cost</string>
+    <string name="repair_status">Repair Status</string>
+    <string name="provider">Provider</string>
+    <string name="save_budget">Save Budget</string>
+    <string name="status_approved">Approved</string>
+    <string name="status_in_progress">In Progress</string>
+    <string name="status_completed">Completed</string>
+    <string name="edit_budget">Edit Budget</string>
+    <string name="select_property">Select Property</string>
+    <string name="add">Add</string>
+    <string name="add_property">Add Property</string>
+    <string name="add_tenant">Add Tenant</string>
+    <string name="all_filter">All</string>
+    <string name="available_filter">Available</string>
+    <string name="rented_filter">Rented</string>
+    <string name="maintenance_filter">Maintenance</string>
+    <string name="active_filter">Active</string>
+    <string name="inactive_filter">Inactive</string>
+    <string name="properties_list_title">Properties</string>
+    <string name="tenants_list_title">Tenants</string>
+    <string name="cancel">Cancel</string>
+    <string name="search_hint">Search...</string>
+    <!-- Property List & Stats -->
+    <string name="empty_properties_available_title">No properties available</string>
+    <string name="empty_properties_available_desc">All your properties are occupied or under maintenance.</string>
+    <string name="empty_properties_rented_title">No properties rented</string>
+    <string name="empty_properties_rented_desc">It seems you don\'t have active tenants yet.</string>
+    <string name="empty_properties_maintenance_title">Everything is in order</string>
+    <string name="empty_properties_maintenance_desc">You don\'t have properties under maintenance currently.</string>
+    <string name="empty_properties_general_desc">Start by adding your first property to manage your rentals.</string>
+    <string name="beds">Beds</string>
+    <string name="baths">Baths</string>
+    <string name="area_label">Area</string>
+    <string name="property_photo_desc">Property Photo</string>
+
+    <string name="total_label">TOTAL</string>
+    <string name="empty_tenants_active_title">No active tenants</string>
+    <string name="empty_tenants_active_desc">You don\'t have current contracts at this time.</string>
+    <string name="empty_tenants_delayed_title">Great news!</string>
+    <string name="empty_tenants_delayed_desc">You don\'t have tenants with overdue payments.</string>
+    <string name="empty_tenants_paid_title">No recent payments</string>
+    <string name="empty_tenants_paid_desc">No payments have been registered for this filter yet.</string>
+    <string name="empty_tenants_general_desc">Add the people who rent your properties to keep track.</string>
+    <string name="not_available_short">N/A</string>
+
+    <string name="payment_modality">Payment Modality</string>
+    <string name="contract_type">Contract Type</string>
+    <string name="cash">Cash</string>
+    <string name="anticretico">Anticretico</string>
+    <string name="property_rules_label">Property Rules</string>
+    <string name="property_rules_hint">e.g. No pets, no parties...</string>
 </resources>

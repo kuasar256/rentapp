@@ -1,5 +1,8 @@
 package com.example.rentapp.ui.screens.contract
 
+import android.net.Uri
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.shrinkVertically
@@ -16,7 +19,6 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -31,9 +33,12 @@ import com.example.rentapp.R
 import com.example.rentapp.data.local.entity.Contract
 import com.example.rentapp.data.local.entity.Tenant
 import com.example.rentapp.data.repository.ContractRepository
+import com.example.rentapp.data.preferences.PreferencesManager
 import com.example.rentapp.ui.screens.auth.NeonTextField
 import com.example.rentapp.ui.screens.property.SectionLabel
 import com.example.rentapp.ui.theme.*
+import com.example.rentapp.ui.components.DocumentGallery
+import com.example.rentapp.ui.components.persistImageLocally
 import com.example.rentapp.viewmodel.PropertyViewModel
 import com.example.rentapp.viewmodel.TenantViewModel
 import com.example.rentapp.notification.NotificationHelper
@@ -75,6 +80,13 @@ fun AddContractScreen(
     var newDocumentId by remember { mutableStateOf("") }
     var newOccupation by remember { mutableStateOf("") }
 
+    // Validation States
+    var newFirstNameError by remember { mutableStateOf<String?>(null) }
+    var newLastNameError by remember { mutableStateOf<String?>(null) }
+    var newEmailError by remember { mutableStateOf<String?>(null) }
+    var depositError by remember { mutableStateOf<String?>(null) }
+    var tenantSelectionError by remember { mutableStateOf<String?>(null) }
+
     // ── Contract State ───────────────────────────────────────────────────────
     var monthlyRent by remember { mutableStateOf("") }
     var deposit by remember { mutableStateOf("") }
@@ -84,6 +96,7 @@ fun AddContractScreen(
     var guarantorName by remember { mutableStateOf("") }
     var guarantorProperty by remember { mutableStateOf("") }
     var isGuarantorRequired by remember { mutableStateOf(false) }
+    var documentImageUris by remember { mutableStateOf<List<String>>(emptyList()) }
 
     var showTermsDialog by remember { mutableStateOf(false) }
     var termsAccepted by remember { mutableStateOf(false) }
@@ -110,8 +123,8 @@ fun AddContractScreen(
     }
 
     // ── Dates ────────────────────────────────────────────────────────────────
-    var startDate by remember { mutableStateOf<Long?>(System.currentTimeMillis()) }
-    var endDate by remember { mutableStateOf<Long?>(System.currentTimeMillis() + 31536000000L) }
+    var startDate by remember { mutableLongStateOf(System.currentTimeMillis()) }
+    var endDate by remember { mutableLongStateOf(System.currentTimeMillis() + 31536000000L) }
     var isIndefinite by remember { mutableStateOf(false) }
     var showStartDatePicker by remember { mutableStateOf(false) }
     var showEndDatePicker by remember { mutableStateOf(false) }
@@ -122,6 +135,10 @@ fun AddContractScreen(
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
     val dateFormatter = remember { SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()) }
+
+    // Currency icon logic
+    val currencyCode by PreferencesManager.getCurrencyFlow(context).collectAsState(initial = "USD")
+    val currencyIcon = if (currencyCode == "BOB") Icons.Default.Payments else Icons.Default.AttachMoney
 
     // Validation
     val existingTenantValid = tenantMode == 0 && selectedTenantId != null
@@ -134,11 +151,14 @@ fun AddContractScreen(
     val contractFieldsValid = monthlyRentValue != null && 
                              depositValue != null && 
                              paymentDueDay.isNotBlank() && 
-                             startDate != null && 
-                             (isIndefinite || (endDate != null && endDate!! > startDate!!)) &&
+                             (isIndefinite || (endDate > startDate)) &&
                              (!isAnticretico || depositValue > 0) // Anticrético must have a deposit/amount
 
+    // Check if form is valid (can be used for additional logic if needed)
     val isFormValid = (existingTenantValid || newTenantValid) && contractFieldsValid
+    
+    // Silence unused warning if needed, though we'll keep the logic as reference
+    println("Form validity: $isFormValid")
 
     Scaffold(
         topBar = {
@@ -204,6 +224,7 @@ fun AddContractScreen(
                     selectedMode = tenantMode,
                     onModeChange = { tenantMode = it }
                 )
+                Spacer(Modifier.height(4.dp))
             }
 
             // ── Existing Tenant Picker ───────────────────────────────────────
@@ -224,16 +245,19 @@ fun AddContractScreen(
                         value = selectedTenantName,
                         onValueChange = {},
                         readOnly = true,
-                        label = { Text(stringResource(R.string.select_tenant), color = OnSurfaceVariant) },
-                        leadingIcon = { Icon(Icons.Default.Person, contentDescription = null, tint = Primary) },
+                        label = { Text(stringResource(R.string.select_tenant), color = if (tenantSelectionError != null) MaterialTheme.colorScheme.error else OnSurfaceVariant) },
+                        leadingIcon = { Icon(Icons.Default.Person, contentDescription = null, tint = if (tenantSelectionError != null) MaterialTheme.colorScheme.error else Primary) },
                         trailingIcon = {
                             if (tenantId == null) ExposedDropdownMenuDefaults.TrailingIcon(expanded = tenantDropdownExpanded)
                         },
                         modifier = Modifier.fillMaxWidth().menuAnchor(MenuAnchorType.PrimaryNotEditable),
+                        isError = tenantSelectionError != null,
+                        supportingText = tenantSelectionError?.let { { Text(it, color = MaterialTheme.colorScheme.error) } },
                         colors = OutlinedTextFieldDefaults.colors(
                             focusedTextColor = OnBackground, unfocusedTextColor = OnBackground,
                             focusedBorderColor = Primary, unfocusedBorderColor = OutlineVariant,
-                            focusedContainerColor = SurfaceContainer, unfocusedContainerColor = SurfaceContainer
+                            focusedContainerColor = SurfaceContainer, unfocusedContainerColor = SurfaceContainer,
+                            errorBorderColor = MaterialTheme.colorScheme.error
                         ),
                         shape = RoundedCornerShape(12.dp),
                         enabled = tenantId == null
@@ -298,25 +322,40 @@ fun AddContractScreen(
                             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                                 NeonTextField(
                                     value = newFirstName,
-                                    onValueChange = { newFirstName = it },
+                                    onValueChange = { 
+                                        newFirstName = it
+                                        if (it.isNotBlank()) newFirstNameError = null
+                                    },
                                     label = stringResource(R.string.first_name),
                                     leadingIcon = Icons.Default.Person,
-                                    modifier = Modifier.weight(1f)
+                                    modifier = Modifier.weight(1f),
+                                    isError = newFirstNameError != null,
+                                    supportingText = newFirstNameError?.let { { Text(it, color = MaterialTheme.colorScheme.error) } }
                                 )
                                 NeonTextField(
                                     value = newLastName,
-                                    onValueChange = { newLastName = it },
+                                    onValueChange = { 
+                                        newLastName = it
+                                        if (it.isNotBlank()) newLastNameError = null
+                                    },
                                     label = stringResource(R.string.last_name),
                                     leadingIcon = Icons.Default.Person,
-                                    modifier = Modifier.weight(1f)
+                                    modifier = Modifier.weight(1f),
+                                    isError = newLastNameError != null,
+                                    supportingText = newLastNameError?.let { { Text(it, color = MaterialTheme.colorScheme.error) } }
                                 )
                             }
                             NeonTextField(
                                 value = newEmail,
-                                onValueChange = { newEmail = it },
+                                onValueChange = { 
+                                    newEmail = it
+                                    if (it.isNotBlank()) newEmailError = null
+                                },
                                 label = stringResource(R.string.email_label),
                                 leadingIcon = Icons.Default.Email,
-                                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email)
+                                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
+                                isError = newEmailError != null,
+                                supportingText = newEmailError?.let { { Text(it, color = MaterialTheme.colorScheme.error) } }
                             )
                             NeonTextField(
                                 value = newPhone,
@@ -344,6 +383,7 @@ fun AddContractScreen(
 
             // ── Contract Details ─────────────────────────────────────────────
             SectionLabel("Términos del Contrato")
+            Spacer(Modifier.height(4.dp))
 
             Card(
                 colors = CardDefaults.cardColors(containerColor = SurfaceContainer),
@@ -375,7 +415,7 @@ fun AddContractScreen(
 
                     // Start Date
                     OutlinedTextField(
-                        value = startDate?.let { dateFormatter.format(Date(it)) } ?: "",
+                        value = dateFormatter.format(Date(startDate)),
                         onValueChange = {},
                         readOnly = true,
                         label = { Text(stringResource(R.string.start_date), color = OnSurfaceVariant) },
@@ -395,7 +435,7 @@ fun AddContractScreen(
                     // End Date
                     AnimatedVisibility(visible = !isIndefinite, enter = expandVertically(), exit = shrinkVertically()) {
                         OutlinedTextField(
-                            value = endDate?.let { dateFormatter.format(Date(it)) } ?: "",
+                            value = dateFormatter.format(Date(endDate)),
                             onValueChange = {},
                             readOnly = true,
                             label = { Text(stringResource(R.string.end_date), color = OnSurfaceVariant) },
@@ -448,6 +488,7 @@ fun AddContractScreen(
             }
 
             SectionLabel("Valores Financieros")
+            Spacer(Modifier.height(4.dp))
             val isAnticretico = property?.paymentType == "Anticrético"
             Card(
                 colors = CardDefaults.cardColors(containerColor = SurfaceContainer),
@@ -480,25 +521,33 @@ fun AddContractScreen(
                         NeonTextField(
                             value = monthlyRent,
                             onValueChange = { if (it.isEmpty() || it.all { c -> c.isDigit() || c == '.' }) monthlyRent = it },
-                            label = if (isAnticretico) "Alquiler (0)" else stringResource(R.string.monthly_rent, ""),
-                            leadingIcon = Icons.Default.AttachMoney,
+                            label = if (isAnticretico) "Alquiler (0)" else stringResource(R.string.monthly_rent, currencyCode.uppercase()),
+                            leadingIcon = currencyIcon,
                             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
                             modifier = Modifier.weight(1f),
                             enabled = false
                         )
                         NeonTextField(
                             value = deposit,
-                            onValueChange = { if (it.isEmpty() || it.all { c -> c.isDigit() || c == '.' }) deposit = it },
+                            onValueChange = { 
+                                if (it.isEmpty() || it.all { c -> c.isDigit() || c == '.' }) {
+                                    deposit = it
+                                    depositError = null
+                                }
+                            },
                             label = if (isAnticretico) "Monto Anticrético" else stringResource(R.string.deposit),
-                            leadingIcon = Icons.Default.AccountBalanceWallet,
+                            leadingIcon = currencyIcon,
                             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
-                            modifier = Modifier.weight(1f)
+                            modifier = Modifier.weight(1f),
+                            isError = depositError != null,
+                            supportingText = depositError?.let { { Text(it, color = MaterialTheme.colorScheme.error) } }
                         )
                     }
                 }
             }
 
             SectionLabel("Cláusulas y Penalizaciones")
+            Spacer(Modifier.height(4.dp))
             Card(
                 colors = CardDefaults.cardColors(containerColor = SurfaceContainer),
                 shape = RoundedCornerShape(16.dp),
@@ -540,6 +589,7 @@ fun AddContractScreen(
             }
 
             SectionLabel("Aval (Opcional)")
+            Spacer(Modifier.height(4.dp))
             Card(
                 colors = CardDefaults.cardColors(containerColor = SurfaceContainer),
                 shape = RoundedCornerShape(16.dp),
@@ -591,6 +641,23 @@ fun AddContractScreen(
                 }
             }
 
+            SectionLabel("Fotos del Contrato Firmado")
+            Spacer(Modifier.height(4.dp))
+            val multiImageLauncher = rememberLauncherForActivityResult(
+                contract = ActivityResultContracts.GetMultipleContents()
+            ) { uris: List<Uri> ->
+                val localPaths = uris.mapNotNull { persistImageLocally(context, it) }
+                documentImageUris = documentImageUris + localPaths
+            }
+            
+            DocumentGallery(
+                uris = documentImageUris,
+                onAddClick = { multiImageLauncher.launch("image/*") },
+                onImageClick = { index -> 
+                    // Optional: View full screen even in edit mode
+                }
+            )
+
             Spacer(Modifier.height(8.dp))
 
             // ── Save Button ──────────────────────────────────────────────────
@@ -601,10 +668,40 @@ fun AddContractScreen(
                     .clip(RoundedCornerShape(16.dp))
                     .background(
                         Brush.horizontalGradient(listOf(NeonGradientStart, NeonGradientEnd)),
-                        alpha = if (isSaving || !isFormValid) 0.45f else 1f
+                        alpha = if (isSaving) 0.45f else 1f
                     )
-                    .clickable(enabled = !isSaving && isFormValid) {
-                        showTermsDialog = true
+                    .clickable(enabled = !isSaving) {
+                        // Validation logic
+                        var hasError = false
+                        
+                        if (tenantMode == 0 && selectedTenantId == null) {
+                            tenantSelectionError = context.resources.getString(R.string.error_field_required)
+                            hasError = true
+                        }
+                        
+                        if (tenantMode == 1) {
+                            if (newFirstName.isBlank()) {
+                                newFirstNameError = context.resources.getString(R.string.error_field_required)
+                                hasError = true
+                            }
+                            if (newLastName.isBlank()) {
+                                newLastNameError = context.resources.getString(R.string.error_field_required)
+                                hasError = true
+                            }
+                            if (newEmail.isBlank()) {
+                                newEmailError = context.resources.getString(R.string.error_field_required)
+                                hasError = true
+                            }
+                        }
+                        
+                        if (deposit.isBlank()) {
+                            depositError = context.resources.getString(R.string.error_field_required)
+                            hasError = true
+                        }
+                        
+                        if (!hasError) {
+                            showTermsDialog = true
+                        }
                     },
                 contentAlignment = Alignment.Center
             ) {
@@ -633,7 +730,7 @@ fun AddContractScreen(
                 onDismissRequest = { showStartDatePicker = false },
                 confirmButton = {
                     TextButton(onClick = {
-                        startDate = startDatePickerState.selectedDateMillis
+                        startDate = startDatePickerState.selectedDateMillis ?: startDate
                         showStartDatePicker = false
                     }) { Text(stringResource(R.string.ok)) }
                 },
@@ -648,7 +745,7 @@ fun AddContractScreen(
                 onDismissRequest = { showEndDatePicker = false },
                 confirmButton = {
                     TextButton(onClick = {
-                        endDate = endDatePickerState.selectedDateMillis
+                        endDate = endDatePickerState.selectedDateMillis ?: endDate
                         showEndDatePicker = false
                     }) { Text(stringResource(R.string.ok)) }
                 },
@@ -726,11 +823,11 @@ fun AddContractScreen(
                                 }
 
                                 // 2. Create contract
-                                val finalEndDate = if (isIndefinite) 0L else endDate!!
+                                val finalEndDate = if (isIndefinite) 0L else endDate
                                 val newContract = Contract(
                                     propertyId = propertyId,
                                     tenantId = finalTenantId,
-                                    startDate = startDate!!,
+                                    startDate = startDate,
                                     endDate = finalEndDate,
                                     monthlyRent = monthlyRent.toDoubleOrNull() ?: 0.0,
                                     deposit = deposit.toDoubleOrNull() ?: 0.0,
@@ -741,7 +838,8 @@ fun AddContractScreen(
                                     lateFeePenalty = 0.0,
                                     earlyTerminationPenalty = earlyTerminationPenalty.toDoubleOrNull() ?: 0.0,
                                     guarantorName = guarantorName.trim(),
-                                    guarantorProperty = guarantorProperty.trim()
+                                    guarantorProperty = guarantorProperty.trim(),
+                                    documentImageUris = documentImageUris.joinToString(",")
                                 )
                                 contractRepo.insertContract(newContract)
 
